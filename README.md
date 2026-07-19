@@ -5,7 +5,7 @@
 [![Maintained 2026](https://img.shields.io/badge/Maintained-2026-brightgreen)](https://github.com/smartflowproai-lang)
 [![x402 compatible](https://img.shields.io/badge/x402-compatible-purple)](https://smartflowproai.com)
 
-A CI-native validator for x402 endpoints. Drops into any GitHub workflow, hits your endpoint with a real probe, parses the `402 Payment Required` body against the x402 spec, and fails the build when the manifest drifts, the response budget breaks, or the well-known shape stops conforming.
+A CI-native validator for x402 endpoints. Drops into any GitHub workflow, hits your endpoint with a real probe, reads the `402 Payment Required` quote against the x402 spec, and fails the build when the manifest drifts, the response budget breaks, or the well-known shape stops conforming.
 
 If you ship x402 endpoints (paid APIs that quote a price in the `402` body and accept micropayments), this Action is the regression guard you've been writing by hand. Stop paste-curling probes into PR comments. Wire one job, watch the matrix, sleep at night.
 
@@ -16,7 +16,7 @@ If you ship x402 endpoints (paid APIs that quote a price in the `402` body and a
 Out of the box, the Action runs **5 compliance checks**:
 - Reachability — endpoint responds
 - `/.well-known/x402` manifest format
-- 402 response body shape
+- 402 response conformance
 - Response time (P95)
 - Payment-required behavior
 
@@ -60,6 +60,7 @@ Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on
 | `webhook-url` | no | `''` | Slack or Teams webhook for per-run notifications. Pro tier only. |
 | `report-path` | no | `x402-validator-report.json` | Where the JSON report lands inside the workspace. Upload it as an artifact if you want history. |
 | `fail-on` | no | `any` | `any` = fail on any check failure. `critical` = fail only on manifest/402 conformance issues. `never` = report-only, never fails the workflow. |
+| `probe-method` | no | `auto` | Probe method for the unauthenticated payment-required check: `auto` tries GET then POST; `GET` or `POST` forces one method. |
 
 ---
 
@@ -80,11 +81,27 @@ Each endpoint goes through five layers:
 
 1. **Reachability** — DNS resolves, TLS handshake completes, server responds.
 2. **`/.well-known/x402` manifest** — discoverable, parses as JSON, advertises the same endpoint paths you claim.
-3. **402 body conformance** — `paymentRequirements` array present, `scheme` recognized (`exact` first-class), `network` declared, `maxAmountRequired` parseable, `asset` and `payTo` populated, `resource` echoes the original URL.
+3. **402 conformance** — reads the v2 `PAYMENT-REQUIRED` header first, decodes its base64 `PaymentRequired` object, and validates `accepts[]`. Body JSON remains supported as the legacy placement for v1/body-only endpoints. `exact` is first-class, `network` is declared, the amount is parseable, `asset` and `payTo` are populated, and `resource` echoes the original URL when present.
 4. **Response time** — p50/p95/p99 against your declared budget. Fail above `threshold-p95`.
-5. **Payment-required behavior** — the endpoint actually returns `402` for unauthenticated probes (no silent `200` with empty body, no `401`, no `403`).
+5. **Payment-required behavior** — the endpoint actually returns `402` for unauthenticated probes. By default the probe is automatic: try GET, then POST, and record the method that produced the verdict (no silent `200` with empty body, no `401`, no `403`).
 
 Findings land in the JSON report with severity (`critical`, `warning`, `info`), endpoint URL, and a one-line remediation hint.
+
+The JSON report keeps the compatibility key `checks.body_conformance`, but the v2 path is header-canonical. That check may include:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `channel` | `header` \| `body` \| `both` | Where the decoded `PaymentRequired` was found. |
+| `probe_method` | `GET` \| `POST` | Method whose response produced the verdict. |
+| `schemes` | array of strings | Schemes observed in the canonical `accepts[]`. |
+| `networks` | array of strings | Networks observed in the canonical `accepts[]`. |
+| `failure_class` | string or null | Stable failure reason such as `v2_header_invalid`, `network_format`, or `l402_www_authenticate`. |
+| `legacy_placement` | boolean | True when a body-only response passed through the legacy/body path. |
+| `channel_mismatch` | boolean | True when header and body both exist but disagree on amount, network, or `payTo`. |
+| `channel_mismatch_fields` | array of strings | The mismatched fields: `amount`, `network`, and/or `payTo`. |
+| `caip2_in_header` | boolean | True when the canonical header includes CAIP-2 network identifiers. |
+
+If a response only offers an L402/Lightning `WWW-Authenticate` challenge and no decodable JSON `PaymentRequired`, it is reported with the separate `l402_www_authenticate` failure class rather than treated as a passing x402 v2 header response.
 
 ---
 
@@ -258,7 +275,7 @@ No. It runs inside your GitHub runner, hits your endpoints, and writes the repor
 No. It performs the unauthenticated probe (the one that triggers `402`) and walks the response. No settlement happens. Your endpoint's price stays untouched.
 
 **Does it support schemes other than `exact`?**
-`exact` is first-class. `upto` is parsed but warning-level. Other schemes pass-through with `info` severity. PRs welcome to expand.
+`exact` is first-class. Other schemes are not expanded by the header-channel pass and should be treated as report-only/lower-confidence until dedicated validators land. PRs welcome to expand.
 
 **Will it support Solana / non-EVM networks?**
 EVM is shipped. Solana is on the roadmap once the x402 Solana settlement primitive stabilizes. Track issue #1.
