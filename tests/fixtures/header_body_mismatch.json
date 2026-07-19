@@ -1,0 +1,18 @@
+{
+  "name": "header_body_mismatch",
+  "url": "https://example.test/api/header-body-mismatch",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9leGFtcGxlLnRlc3QvYXBpL2hlYWRlci1ib2R5LW1pc21hdGNoIiwibWV0aG9kIjoiR0VUIiwiZGVzY3JpcHRpb24iOiJTeW50aGV0aWMgaGVhZGVyL2JvZHkgbWlzbWF0Y2ggZml4dHVyZSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFtb3VudCI6IjEwMDAwIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJwYXlUbyI6IjB4QWFBYUFhQWFBYUFhQWFBYUFhQWFBYUFhQWFBYUFhQWFBYUFhQWFBYSIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19XX0=",
+    "content-type": "application/json"
+  },
+  "body": "{\"x402Version\":2,\"error\":\"Payment required\",\"accepts\":[{\"scheme\":\"exact\",\"network\":\"eip155:8453\",\"amount\":\"999\",\"asset\":\"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\"payTo\":\"0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb\",\"maxTimeoutSeconds\":300}]}",
+  "expect": {
+    "passed": true,
+    "channel": "both",
+    "legacy_placement": false,
+    "failure_class": null,
+    "channel_mismatch": true
+  }
+}

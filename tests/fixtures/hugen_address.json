@@ -1,0 +1,25 @@
+{
+  "name": "hugen_address",
+  "url": "https://defi.hugen.tokyo/defi/address",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "date": "Sun, 19 Jul 2026 15:09:09 GMT",
+    "content-type": "application/json",
+    "content-length": "1051",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9kZWZpLmh1Z2VuLnRva3lvL2RlZmkvYWRkcmVzcyIsImRlc2NyaXB0aW9uIjoiQWRkcmVzcyBzZWN1cml0eSBjaGVjayDigJQgZGV0ZWN0IG1hbGljaW91cyB3YWxsZXRzLCBrbm93biBwaGlzaGluZyBhZGRyZXNzZXMsIHNjYW0gY29udHJhY3RzLCBhbmQgYmxhY2tsaXN0ZWQgZW50aXRpZXMgYWNyb3NzIGFsbCBFVk0gY2hhaW5zLiBDaGFpbi1pbmRlcGVuZGVudCBsb29rdXAgYWdhaW5zdCBtdWx0aS1jaGFpbiBzZWN1cml0eSBkYXRhYmFzZXMuIE5vIEFQSSBrZXlzIG5lZWRlZC4gQWNjZXB0cyBVU0RDIHBheW1lbnRzIG9uIEJhc2UgYW5kIFNvbGFuYSIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwiYW1vdW50IjoiMTAwMDAiLCJwYXlUbyI6IjB4MjkzMjJFYTdFY0IzNGFBNjE2NGNiMmRkZUI5Q0U2NTA5MDJFNGY2MCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19LHsic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoic29sYW5hOjVleWt0NFVzRnY4UDhOSmRUUkVwWTF2enFLcVpLdmRwIiwiYXNzZXQiOiJFUGpGV2RkNUF1ZnFTU3FlTTJxTjF4enliYXBDOEc0d0VHR2tad3lURHQxdiIsImFtb3VudCI6IjEwMDAwIiwicGF5VG8iOiI0ZHU0QWZrakpFd2NoMnprM3Noa1BKVlpmeUpITkRuTmpFV0M2QWJvYVM1WiIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7ImZlZVBheWVyIjoiR1ZKSjdyZEdpWHI1eGFZYlJ3UmJqZmFKTDdmbXdSeWdGaTFINmFHcUR2ZWIifX1dLCJleHRlbnNpb25zIjp7ImJhemFhciI6eyJkaXNjb3ZlcmFibGUiOnRydWUsImNhdGVnb3J5IjoiZGVmaSIsInRhZ3MiOlsiZGVmaSIsInNlY3VyaXR5IiwiYnJpZGdlIiwidHZsIiwicnVncHVsbCJdLCJpbmZvIjp7ImlucHV0Ijp7InR5cGUiOiJodHRwIiwicXVlcnlQYXJhbXMiOnsiYWRkcmVzcyI6IjB4ZDhkQTZCRjI2OTY0YUY5RDdlRWQ5ZTAzRTUzNDE1RDM3YUE5NjA0NSJ9LCJtZXRob2QiOiJHRVQifSwib3V0cHV0Ijp7InR5cGUiOiJqc29uIiwiZXhhbXBsZSI6eyJpc19tYWxpY2lvdXNfYWRkcmVzcyI6ZmFsc2UsImNvbnRyYWN0X2FkZHJlc3MiOmZhbHNlfX19LCJzY2hlbWEiOnsicHJvcGVydGllcyI6eyJpbnB1dCI6eyJyZXF1aXJlZCI6WyJtZXRob2QiXX19fX19fQ==",
+    "server": "cloudflare",
+    "cf-cache-status": "DYNAMIC",
+    "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=GJTHztovqwXlZ%2BVz3t9gi5n2PGaN4raWfCphj3ibQmtYTMuF0XPejSma8d6c27GdZPhKs1Qg1w6X2A5q7IKA6HF%2FHSvOrRcjY%2Fa4AC3UHvHkzFnHioFmX%2F%2FriALqTfYhFdUh\"}]}",
+    "cf-ray": "a1daa541cd950d87-PDX",
+    "alt-svc": "h3=\":443\"; ma=86400"
+  },
+  "body": "{\"_notice\":\"Payment required ($0.01 USDC on Base). Sample response below.\",\"_alternatives\":{\"mcp\":{\"info\":\"If you support MCP, connect once and access 2,300+ APIs through 92 tools\",\"url\":\"https://mcp.hugen.tokyo/mcp\",\"transport\":\"streamable-http\"},\"sdk\":{\"info\":\"One-line Python access \u2014 no wallet, no setup\",\"install\":\"pip install x402-pay\",\"usage\":\"import x402_pay; r = x402_pay.get('https://defi.hugen.tokyo/defi/token?chain=base&address=0x...')\"},\"intel\":{\"info\":\"AI-synthesized risk analysis \u2014 aggregates 4+ sources, 0-100 risk scoring, actionable verdict. One $0.50 call replaces 4 API calls + LLM synthesis\",\"example\":\"https://intel.hugen.tokyo/intel/token-report?address=0xdac17f958d2ee523a2206206994597c13d831ec7&chain=base\"},\"whale\":{\"info\":\"Track whale wallets behind the tokens you audit \u2014 412K labeled Ethereum addresses, entity resolution, movement detection ($0.01-0.02)\",\"example\":\"https://whale.hugen.tokyo/whale/lookup?address=0x28c6c06298d514db089934071355e5743bf21d60\"}},\"is_malicious_address\":false,\"contract_address\":false}",
+  "expect": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false,
+    "failure_class": null
+  }
+}

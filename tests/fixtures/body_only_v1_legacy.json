@@ -1,0 +1,14 @@
+{
+  "name": "body_only_v1_legacy",
+  "url": "https://example.test/api/body-only-v1-legacy",
+  "method": "GET",
+  "status": 402,
+  "headers": {},
+  "body": "{\"x402Version\":1,\"error\":\"Payment required\",\"accepts\":[{\"scheme\":\"exact\",\"network\":\"base\",\"maxAmountRequired\":\"1000\",\"asset\":\"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\"payTo\":\"0xabc0000000000000000000000000000000000000\"}]}",
+  "expect": {
+    "passed": true,
+    "channel": "body",
+    "legacy_placement": true,
+    "failure_class": null
+  }
+}

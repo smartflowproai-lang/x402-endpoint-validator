@@ -1,0 +1,31 @@
+{
+  "name": "apinow_buzzwords",
+  "url": "https://apinow.fun/api/endpoints/apinowfun/buzzwords",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "access-control-allow-headers": "Content-Type, Authorization, X-Payment, Payment-Signature, X-Transaction-Hash, x-wallet-address, x-admin-key, x-apinow-invocation-json, x-workflow-run-id",
+    "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD",
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers": "X-Payment-Response, Payment-Response, Payment-Required, WWW-Authenticate, X-Payment",
+    "access-control-max-age": "86400",
+    "age": "0",
+    "cache-control": "public, max-age=0, must-revalidate",
+    "content-type": "application/json",
+    "date": "Sun, 19 Jul 2026 15:09:08 GMT",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly93d3cuYXBpbm93LmZ1bi9hcGkvZW5kcG9pbnRzL2FwaW5vd2Z1bi9idXp6d29yZHMiLCJkZXNjcmlwdGlvbiI6IlJldHVybnMgYSBzZW5zYXRpb25hbCBidXp6d29yZCIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiJ9LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFtb3VudCI6IjEwMDAwIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJwYXlUbyI6IjB4MTNFMGRDZmY0NDg1NzVFQjU1MDgzMDJCMDJmNzNBOEZBQmY1MTIyNSIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19XX0=",
+    "server": "Vercel",
+    "strict-transport-security": "max-age=63072000",
+    "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "x-matched-path": "/api/endpoints/[id]/[endpoint]",
+    "x-vercel-cache": "MISS",
+    "x-vercel-id": "pdx1::iad1::rbcqx-1784473748271-ecb2242671b8"
+  },
+  "body": "{}",
+  "expect": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false,
+    "failure_class": null
+  }
+}
