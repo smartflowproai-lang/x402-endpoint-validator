@@ -61,6 +61,17 @@ Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on
 | `report-path` | no | `x402-validator-report.json` | Where the JSON report lands inside the workspace. Upload it as an artifact if you want history. |
 | `fail-on` | no | `any` | `any` = fail on any check failure. `critical` = fail only on manifest/402 conformance issues. `never` = report-only, never fails the workflow. |
 | `probe-method` | no | `auto` | Probe method for the unauthenticated payment-required check: `auto` tries GET then POST; `GET` or `POST` forces one method. |
+| `strict-v2` | no | `false` | Opt into the strict-v2 contract: reproducible v2 verdicts, fresh probe timestamping, raw response archive, and body-only legacy placement as a strict failure. |
+
+### Strict-v2 mode
+
+`strict-v2` is wired as an Action input for the issue #1 strict-v2 contract. The
+mode is designed for reproducible v2-only verdicts: each strict verdict is based
+on a fresh probe, records `probed_at_utc`, archives the raw response used for
+the decision, and treats body-only legacy placement as
+`failure_class=legacy_placement`. See
+`docs/superpowers/specs/2026-07-19-strict-v2-mode-design.md` for the locked
+policy before validator enforcement lands.
 
 ---
 
@@ -86,6 +97,14 @@ Each endpoint goes through five layers:
 5. **Payment-required behavior** — the endpoint actually returns `402` for unauthenticated probes. By default the probe is automatic: try GET, then POST, and record the method that produced the verdict (no silent `200` with empty body, no `401`, no `403`).
 
 Findings land in the JSON report with severity (`critical`, `warning`, `info`), endpoint URL, and a one-line remediation hint.
+
+### Strict-v2 contract
+
+When `strict-v2: 'true'` is enforced by the validator, the v2 verdict must come
+from a fresh unauthenticated probe with `probed_at_utc` and an archived
+`raw_response`. Valid body-only responses remain visible as legacy placement,
+but strict mode classifies them as `failure_class=legacy_placement` instead of a
+passing v2 result.
 
 The JSON report keeps the compatibility key `checks.body_conformance`, but the v2 path is header-canonical. That check may include:
 
