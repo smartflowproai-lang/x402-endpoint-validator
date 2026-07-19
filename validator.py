@@ -230,13 +230,22 @@ def _probe_once(url: str, method: str) -> Any:
     return requests.get(url, timeout=DEFAULT_TIMEOUT_S, headers=headers)
 
 
-def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
+def _utc_now() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def check_402_body(
+    url: str,
+    probe_method: str = "auto",
+    strict_v2: bool = False,
+) -> dict[str, Any]:
     """Probe for HTTP 402 and validate PaymentRequired (header-canonical v2).
 
     Probe order for ``auto``: GET then POST. First 402 response wins.
     Requirements are taken from PAYMENT-REQUIRED when present; body-only
-    responses still pass with ``legacy_placement=True``.
+    responses still pass with ``legacy_placement=True`` unless ``strict_v2``.
     """
+    probed_at_utc = _utc_now()
     last_exc: Exception | None = None
     chosen = None
     chosen_method: str | None = None
@@ -247,6 +256,7 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
         except requests.RequestException as exc:
             last_exc = exc
             continue
+        probed_at_utc = _utc_now()
         if resp.status_code == 402:
             chosen = resp
             chosen_method = method
@@ -255,8 +265,8 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
         chosen = resp
         chosen_method = method
 
-    if chosen is None:
-        return {
+    def _base_result(**extra: Any) -> dict[str, Any]:
+        out = {
             "passed": False,
             "payment_required_passed": False,
             "status_code": None,
@@ -272,13 +282,29 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
             "caip2_in_header": False,
             "missing_keys": [],
             "x402_version": None,
-            "note": f"network error: {last_exc.__class__.__name__}" if last_exc else "no probe response",
+            "findings": [],
+            "strict_v2": strict_v2,
+            "probed_at_utc": probed_at_utc,
+            "note": "",
         }
+        out.update(extra)
+        return out
+
+    if chosen is None:
+        return _base_result(
+            note=f"network error: {last_exc.__class__.__name__}" if last_exc else "no probe response",
+        )
 
     status = chosen.status_code
     is_402 = status == 402
     body_text = chosen.text if chosen.text is not None else ""
     headers = {str(k): str(v) for k, v in chosen.headers.items()}
+    raw_response = {
+        "status_code": status,
+        "headers": {k.lower(): v for k, v in headers.items()},
+        "body": body_text,
+        "probed_at_utc": probed_at_utc,
+    }
 
     extracted = extract_payment_required(status, headers, body_text)
     mismatch_fields = compare_channels(extracted.header_obj, extracted.body_obj)
@@ -304,9 +330,22 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
             if failure_class == "l402_www_authenticate"
             else "no PaymentRequired in PAYMENT-REQUIRED header or body accepts[]"
         )
+    elif strict_v2 and extracted.legacy_placement:
+        # Issue #1: strict-v2 forbids body-only legacy placement.
+        failure_class = "legacy_placement"
+        body_ok = False
+        note = "strict-v2 requires PAYMENT-REQUIRED header; body-only legacy placement rejected"
+        if isinstance(extracted.body_obj, dict):
+            soft = validate_accepts(extracted.body_obj, source="body", strict_v2=False)
+            schemes = soft.schemes
+            networks = soft.networks
     else:
         source = "header" if extracted.header_obj is not None else "body"
-        validated = validate_accepts(extracted.canonical, source=source)
+        validated = validate_accepts(
+            extracted.canonical,
+            source=source,
+            strict_v2=strict_v2,
+        )
         body_ok = validated.ok
         schemes = validated.schemes
         networks = validated.networks
@@ -322,7 +361,8 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
             elif channel_mismatch:
                 note = "402 with conformant header PaymentRequired (body mismatch noted)"
             else:
-                note = f"402 with conformant PaymentRequired via {extracted.channel}"
+                mode = "strict-v2 " if strict_v2 else ""
+                note = f"402 with {mode}conformant PaymentRequired via {extracted.channel}"
         else:
             note = "; ".join(findings) if findings else "non-conformant PaymentRequired"
 
@@ -352,6 +392,9 @@ def check_402_body(url: str, probe_method: str = "auto") -> dict[str, Any]:
         "missing_keys": missing_keys,
         "x402_version": x402_version,
         "findings": findings,
+        "strict_v2": strict_v2,
+        "probed_at_utc": probed_at_utc,
+        "raw_response": raw_response,
         "note": note,
     }
 
@@ -427,11 +470,12 @@ def validate_endpoint(
     threshold_ms: int,
     api_key: str = "",
     probe_method: str = "auto",
+    strict_v2: bool = False,
 ) -> dict[str, Any]:
     log(f"validating {url}")
     reach = check_reachability(url)
     manifest = check_manifest(url)
-    body = check_402_body(url, probe_method=probe_method)
+    body = check_402_body(url, probe_method=probe_method, strict_v2=strict_v2)
     perf = check_p95(url, threshold_ms)
     endpoint_passed = all((
         reach["passed"],
@@ -443,6 +487,7 @@ def validate_endpoint(
     result = {
         "url": url,
         "passed": endpoint_passed,
+        "probed_at_utc": body.get("probed_at_utc"),
         "checks": {
             "reachability": reach,
             "manifest": manifest,
@@ -531,6 +576,8 @@ def main() -> int:
     fail_on = (os.environ.get("X402V_FAIL_ON", "any") or "any").lower()
     api_key = os.environ.get("INPUT_API_KEY", "") or os.environ.get("X402V_API_KEY", "")
     probe_method = (os.environ.get("X402V_PROBE_METHOD", "auto") or "auto").strip() or "auto"
+    strict_v2_raw = (os.environ.get("X402V_STRICT_V2", "false") or "false").strip().lower()
+    strict_v2 = strict_v2_raw in ("1", "true", "yes", "on")
 
     if tier == "pro" and not pro_key:
         log("tier=pro requires pro-license-key — falling back to free tier")
@@ -548,10 +595,19 @@ def main() -> int:
 
     log(
         f"tier={tier}, threshold_p95_ms={threshold_ms}, endpoints={len(urls)}, "
-        f"probe_method={probe_method}, enhanced={'on' if api_key else 'off'}"
+        f"probe_method={probe_method}, strict_v2={strict_v2}, enhanced={'on' if api_key else 'off'}"
     )
 
-    results = [validate_endpoint(u, threshold_ms, api_key, probe_method=probe_method) for u in urls]
+    results = [
+        validate_endpoint(
+            u,
+            threshold_ms,
+            api_key,
+            probe_method=probe_method,
+            strict_v2=strict_v2,
+        )
+        for u in urls
+    ]
     failures = sum(1 for r in results if not r["passed"])
     summary = {
         "endpoints_checked": len(results),
@@ -561,8 +617,9 @@ def main() -> int:
         "tier": tier,
         "enhanced_enabled": bool(api_key),
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "validator_version": "1.1.0",
+        "validator_version": "1.2.0",
         "probe_method": probe_method,
+        "strict_v2": strict_v2,
     }
     report = {"summary": summary, "endpoints": results}
 
