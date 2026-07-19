@@ -100,6 +100,23 @@ class Check402BodyTask4ContractTests(unittest.TestCase):
 
     @mock.patch("validator.requests.post")
     @mock.patch("validator.requests.get")
+    def test_invalid_header_with_valid_body_is_v2_header_invalid(self, mock_get, mock_post):
+        mock_get.return_value = MockResponse(
+            402,
+            headers={"payment-required": "%%%not-base64%%%"},
+            json_data=BODY_PAYMENT_REQUIRED_V1,
+        )
+        mock_post.return_value = MockResponse(404)
+
+        result = check_402_body("https://example.test/paywalled")
+
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["failure_class"], "v2_header_invalid")
+        self.assertFalse(result["legacy_placement"])
+        self.assertEqual(result["channel"], "none")
+
+    @mock.patch("validator.requests.post")
+    @mock.patch("validator.requests.get")
     def test_l402_www_authenticate_only_reports_failure_class(self, mock_get, mock_post):
         mock_get.return_value = MockResponse(
             402,

@@ -378,5 +378,38 @@ class PaymentRequiredFailureClassificationTests(unittest.TestCase):
         self.assertIsNone(failure_class)
 
 
+class PaymentRequiredRegressionTests(unittest.TestCase):
+    def test_invalid_payment_required_header_does_not_legacy_pass_via_body(self):
+        result = extract_payment_required(
+            402,
+            {"payment-required": "not-valid-base64"},
+            json.dumps(BODY_PAYMENT_REQUIRED_V1),
+        )
+
+        self.assertTrue(result.header_invalid)
+        self.assertEqual(result.channel, "none")
+        self.assertFalse(result.legacy_placement)
+        self.assertIsNone(result.canonical)
+
+    def test_validate_accepts_rejects_non_numeric_eip155_reference(self):
+        header_obj = {
+            "x402Version": 2,
+            "accepts": [
+                {
+                    "scheme": "exact",
+                    "network": "eip155:abc",
+                    "amount": "10000",
+                    "payTo": "0x1111111111111111111111111111111111111111",
+                }
+            ],
+            "error": "payment required",
+        }
+
+        result = validate_accepts(header_obj, source="header")
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.failure_class, "network_format")
+
+
 if __name__ == "__main__":
     unittest.main()
