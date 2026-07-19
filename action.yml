@@ -38,6 +38,10 @@ inputs:
     description: 'When to set action status to fail: "any" (any check fails), "critical" (only manifest/402 issues), or "never".'
     required: false
     default: 'any'
+  probe-method:
+    description: 'Probe method for payment-required checks: "auto" (GET then POST), "GET", or "POST".'
+    required: false
+    default: 'auto'
   api-key:
     description: 'SmartFlow Mapper API key (optional, unlocks enhanced features: wash detection, reputation history, operator farm flags). Get yours at https://hypersub.xyz/s/smartflow-scorecard'
     required: false
@@ -66,3 +70,4 @@ runs:
     - ${{ inputs.webhook-url }}
     - ${{ inputs.report-path }}
     - ${{ inputs.fail-on }}
+    - ${{ inputs.probe-method }}

@@ -15,6 +15,7 @@ WORKDIR /action
 RUN pip install --no-cache-dir requests==2.32.3 PyYAML==6.0.2
 
 COPY validator.py /action/validator.py
+COPY payment_required.py /action/payment_required.py
 COPY entrypoint.sh /action/entrypoint.sh
 
 RUN chmod +x /action/entrypoint.sh /action/validator.py

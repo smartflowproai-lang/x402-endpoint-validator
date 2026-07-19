@@ -1,0 +1,38 @@
+{
+  "name": "web3identity_blockcount",
+  "url": "https://api.web3identity.com/api/bitcoin/blockcount",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "server": "nginx",
+    "date": "Sun, 19 Jul 2026 15:09:08 GMT",
+    "content-type": "application/json; charset=utf-8",
+    "content-length": "295",
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+    "access-control-allow-headers": "Content-Type, X-API-Key, Authorization, x-payment, payment-signature, X-Payment, Payment-Signature",
+    "access-control-expose-headers": "payment-required, x-payment, x-cache, x-cache-ttl, x-ratelimit-limit, x-ratelimit-remaining, x-ratelimit-reset, x-ratelimit-tier, x-ratelimit-tier-limit, x-ratelimit-tier-remaining, x-ratelimit-global-used, x-ratelimit-global-limit",
+    "access-control-max-age": "86400",
+    "x-content-type-options": "nosniff, nosniff",
+    "x-frame-options": "DENY, DENY",
+    "x-xss-protection": "1; mode=block, 1; mode=block",
+    "referrer-policy": "strict-origin-when-cross-origin, strict-origin-when-cross-origin",
+    "x-api-build": "a93cc8c",
+    "x-cache": "MISS",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhc3NldCI6IjB4ODMzNTg5ZkNENmVEYjZFMDhmNGM3QzMyRDRmNzFiNTRiZEEwMjkxMyIsInBheVRvIjoiMHhGNDk5MTAyYzg3MDdjNjUwMUNhQWREMjAyOGM2REYxYzZDNkU4MTNiIiwiYW1vdW50IjoiNTAwMCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19XSwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9hcGkud2ViM2lkZW50aXR5LmNvbS9hcGkvYml0Y29pbi9ibG9ja2NvdW50IiwiZGVzY3JpcHRpb24iOiJDdXJyZW50IEJpdGNvaW4gYmxvY2tjaGFpbiBoZWlnaHQgYW5kIGJsb2NrIGluZm9ybWF0aW9uIiwibWltZVR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwiZGlzY292ZXJhYmxlIjp0cnVlLCJpbnB1dCI6eyJ0eXBlIjoiaHR0cCIsInF1ZXJ5UGFyYW1zIjp7fX0sIm91dHB1dCI6eyJ0eXBlIjoianNvbiIsImV4YW1wbGUiOnsiYmxvY2tIZWlnaHQiOjgzMDAwMCwidGltZXN0YW1wIjoxNzA4OTA1NjAwLCJhdmdCbG9ja1RpbWUiOjYwMCwiYmxvY2tzVG9kYXkiOjE0NCwibGFzdEJsb2NrIjp7Imhhc2giOiIwMDAwMDAwMDAwMDAwMDAwMDAwMS4uLiIsInRpbWVzdGFtcCI6MTcwODkwNTU0MCwidHJhbnNhY3Rpb25zIjoyNTAwfX19fSwiZmFjaWxpdGF0b3IiOiJodHRwczovL2FwaS5jZHAuY29pbmJhc2UuY29tL3BsYXRmb3JtL3YyL3g0MDIiLCJleHRlbnNpb25zIjp7ImJhemFhciI6eyJkaXNjb3ZlcmFibGUiOnRydWUsImluZm8iOnsiaW5wdXQiOnsidHlwZSI6Imh0dHAiLCJxdWVyeVBhcmFtcyI6e319LCJvdXRwdXQiOnsidHlwZSI6Impzb24iLCJleGFtcGxlIjp7ImJsb2NrSGVpZ2h0Ijo4MzAwMDAsInRpbWVzdGFtcCI6MTcwODkwNTYwMCwiYXZnQmxvY2tUaW1lIjo2MDAsImJsb2Nrc1RvZGF5IjoxNDQsImxhc3RCbG9jayI6eyJoYXNoIjoiMDAwMDAwMDAwMDAwMDAwMDAwMDEuLi4iLCJ0aW1lc3RhbXAiOjE3MDg5MDU1NDAsInRyYW5zYWN0aW9ucyI6MjUwMH19fX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWEiLCJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJpbnB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJjb25zdCI6Imh0dHAifSwibWV0aG9kIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbIkdFVCIsIkhFQUQiLCJERUxFVEUiXX0sInF1ZXJ5UGFyYW1zIjp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7fX19LCJyZXF1aXJlZCI6WyJ0eXBlIl0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZX0sIm91dHB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmcifSwiZXhhbXBsZSI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJibG9ja0hlaWdodCI6eyJ0eXBlIjoibnVtYmVyIn0sInRpbWVzdGFtcCI6eyJ0eXBlIjoibnVtYmVyIn0sImF2Z0Jsb2NrVGltZSI6eyJ0eXBlIjoibnVtYmVyIn0sImJsb2Nrc1RvZGF5Ijp7InR5cGUiOiJudW1iZXIifX19fSwicmVxdWlyZWQiOlsidHlwZSJdfX0sInJlcXVpcmVkIjpbImlucHV0Il19fX19",
+    "x-payment": "{\"scheme\":\"exact\",\"price\":\"$0.005\",\"network\":\"eip155:8453\",\"asset\":\"USDC\",\"payTo\":\"0xF499102c8707c6501CaAdD2028c6DF1c6C6E813b\"}",
+    "etag": "W/\"127-Zlmx/s1DjpEh1Uz//0JBXK6/bW8\"",
+    "x-response-time": "2ms",
+    "vary": "Accept-Encoding",
+    "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+    "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.web3identity.com https://*.ethereum.org https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.web3identity.com https://*.ethereum.org https://*.eth.limo https://ethereum.publicnode.com https://rpc.ankr.com https://base.llamarpc.com https://api.ethfollow.xyz wss://*.ethereum.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+    "permissions-policy": "geolocation=(), microphone=(), camera=()"
+  },
+  "body": "{\"error\":\"Payment Required\",\"code\":\"PAYMENT_REQUIRED\",\"message\":\"Payment required: $0.01 USDC\",\"payment\":{\"scheme\":\"exact\",\"price\":\"$0.005\",\"network\":\"eip155:8453\",\"asset\":\"USDC\",\"payTo\":\"0xF499102c8707c6501CaAdD2028c6DF1c6C6E813b\"},\"facilitator\":\"https://api.cdp.coinbase.com/platform/v2/x402\"}",
+  "expect": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false,
+    "failure_class": null
+  }
+}

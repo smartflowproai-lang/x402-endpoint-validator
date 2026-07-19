@@ -1,0 +1,17 @@
+{
+  "name": "l402_www_authenticate_only",
+  "url": "https://example.test/api/l402-www-authenticate-only",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "www-authenticate": "L402 token=\"invoice\", macaroon=\"AgEDbDQwMg...\", invoice=\"lnbc100n1...\"",
+    "content-type": "text/plain"
+  },
+  "body": "",
+  "expect": {
+    "passed": false,
+    "channel": "none",
+    "legacy_placement": false,
+    "failure_class": "l402_www_authenticate"
+  }
+}
