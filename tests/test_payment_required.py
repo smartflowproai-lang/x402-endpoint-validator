@@ -49,6 +49,26 @@ def _case(name, inline):
     return inline
 
 
+def _header_value(case):
+    for key, value in case["headers"].items():
+        if key.lower() == "payment-required":
+            return value
+    return None
+
+
+def _decoded_header_from_case(case):
+    value = _header_value(case)
+    if value is None:
+        return None
+    return json.loads(base64.b64decode(value).decode("utf-8"))
+
+
+def _body_obj_from_case(case):
+    if not case["body"]:
+        return None
+    return json.loads(case["body"])
+
+
 HEADER_PAYMENT_REQUIRED = {
     "x402Version": 2,
     "accepts": [
@@ -133,6 +153,10 @@ MISMATCH_CASE = _case(
     },
 )
 
+HEADER_ONLY_EXPECTED = _decoded_header_from_case(HEADER_ONLY_CASE)
+BODY_ONLY_EXPECTED = _body_obj_from_case(BODY_ONLY_CASE)
+MISMATCH_HEADER_EXPECTED = _decoded_header_from_case(MISMATCH_CASE)
+
 
 class PaymentRequiredDecodeTests(unittest.TestCase):
     def test_decode_payment_required_header_accepts_case_insensitive_header_name(self):
@@ -156,8 +180,8 @@ class PaymentRequiredExtractionTests(unittest.TestCase):
         )
 
         self.assertEqual(result.channel, "header")
-        self.assertEqual(result.canonical, HEADER_PAYMENT_REQUIRED)
-        self.assertEqual(result.header_obj, HEADER_PAYMENT_REQUIRED)
+        self.assertEqual(result.canonical, HEADER_ONLY_EXPECTED)
+        self.assertEqual(result.header_obj, HEADER_ONLY_EXPECTED)
         self.assertIsNone(result.body_obj)
         self.assertFalse(result.legacy_placement)
 
@@ -169,9 +193,9 @@ class PaymentRequiredExtractionTests(unittest.TestCase):
         )
 
         self.assertEqual(result.channel, "body")
-        self.assertEqual(result.canonical, BODY_PAYMENT_REQUIRED_V1)
+        self.assertEqual(result.canonical, BODY_ONLY_EXPECTED)
         self.assertIsNone(result.header_obj)
-        self.assertEqual(result.body_obj, BODY_PAYMENT_REQUIRED_V1)
+        self.assertEqual(result.body_obj, BODY_ONLY_EXPECTED)
         self.assertTrue(result.legacy_placement)
 
     def test_extract_both_prefers_header_as_canonical_and_keeps_body_for_comparison(self):
@@ -182,8 +206,8 @@ class PaymentRequiredExtractionTests(unittest.TestCase):
         )
 
         self.assertEqual(result.channel, "both")
-        self.assertEqual(result.canonical, HEADER_PAYMENT_REQUIRED)
-        self.assertEqual(result.header_obj, HEADER_PAYMENT_REQUIRED)
+        self.assertEqual(result.canonical, MISMATCH_HEADER_EXPECTED)
+        self.assertEqual(result.header_obj, MISMATCH_HEADER_EXPECTED)
         self.assertIsInstance(result.body_obj, dict)
         self.assertFalse(result.legacy_placement)
 
@@ -221,7 +245,20 @@ class PaymentRequiredComparisonTests(unittest.TestCase):
         self.assertEqual(compare_channels(HEADER_PAYMENT_REQUIRED, body_equivalent), [])
 
     def test_compare_channels_reports_amount_network_and_pay_to_mismatches(self):
-        body_obj = json.loads(MISMATCH_CASE["body"])
+        body_obj = {
+            "x402Version": 1,
+            "accepts": [
+                {
+                    "scheme": "exact",
+                    "network": "base",
+                    "maxAmountRequired": "99999",
+                    "amount": "99999",
+                    "asset": "USDC",
+                    "payTo": "0x2222222222222222222222222222222222222222",
+                }
+            ],
+            "error": "payment required",
+        }
 
         mismatches = compare_channels(HEADER_PAYMENT_REQUIRED, body_obj)
 
