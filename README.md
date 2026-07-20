@@ -285,6 +285,10 @@ So the validator dependency tree (Python + httpx + jsonschema) lives in the imag
 
 ---
 
+## Contributors
+
+- **Gael Leonardo Chulim Gongora** ([@MSSATANASS](https://github.com/MSSATANASS)) — v2 PAYMENT-REQUIRED header-canonical conformance (#3, #4), strict-v2 mode with the fresh-probe response archive (#1, #5), and the 1,098-endpoint failure triage that shaped the v2 check design. First external contributor to this repo.
+
 ## License
 
 MIT © 2026 Tom Smart. See `LICENSE`.
