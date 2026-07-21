@@ -42,6 +42,10 @@ inputs:
     description: 'Probe method for payment-required checks: "auto" (GET then POST), "GET", or "POST".'
     required: false
     default: 'auto'
+  strict-v2:
+    description: 'Enable strict x402 v2 mode. Body-only legacy placement fails under strict mode.'
+    required: false
+    default: 'false'
   api-key:
     description: 'SmartFlow Mapper API key (optional, unlocks enhanced features: wash detection, reputation history, operator farm flags). Get yours at https://hypersub.xyz/s/smartflow-scorecard'
     required: false
@@ -71,3 +75,4 @@ runs:
     - ${{ inputs.report-path }}
     - ${{ inputs.fail-on }}
     - ${{ inputs.probe-method }}
+    - ${{ inputs.strict-v2 }}

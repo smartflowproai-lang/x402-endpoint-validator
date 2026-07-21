@@ -1,0 +1,15 @@
+{
+  "name": "strict_v2_minimal_header",
+  "url": "https://example.test/api/strict-v2-minimal-header",
+  "method": "GET",
+  "status": 402,
+  "headers": {
+    "payment-required": "eyJhY2NlcHRzIjpbeyJhbW91bnQiOiIxMDAwMCIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwibWF4VGltZW91dFNlY29uZHMiOjYwLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJwYXlUbyI6IjB4MTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMSIsInNjaGVtZSI6ImV4YWN0In1dLCJlcnJvciI6InBheW1lbnQgcmVxdWlyZWQiLCJ4NDAyVmVyc2lvbiI6Mn0="
+  },
+  "body": "{}",
+  "expect_strict_v2": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false
+  }
+}

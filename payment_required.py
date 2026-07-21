@@ -188,8 +188,18 @@ def _is_caip2(network: str) -> bool:
     return bool(CAIP2_RE.match(network or ""))
 
 
-def validate_accepts(obj: dict[str, Any], *, source: str) -> ValidateResult:
-    """Validate PaymentRequired.accepts[] for header (v2) or body (legacy) source."""
+def validate_accepts(
+    obj: dict[str, Any],
+    *,
+    source: str,
+    strict_v2: bool = False,
+) -> ValidateResult:
+    """Validate PaymentRequired.accepts[] for header (v2) or body (legacy) source.
+
+    When ``strict_v2=True`` (issue #1): require integer x402Version==2, CAIP-2
+    networks, digit ``amount`` (not maxAmountRequired alone), asset, payTo,
+    maxTimeoutSeconds>0, and scheme in {exact, upto}. Unknown schemes hard-fail.
+    """
     findings: list[str] = []
     schemes: list[str] = []
     networks: list[str] = []
@@ -210,12 +220,22 @@ def validate_accepts(obj: dict[str, Any], *, source: str) -> ValidateResult:
         )
 
     version_raw = obj.get("x402Version")
-    try:
-        version = int(version_raw) if version_raw is not None else (2 if source == "header" else 1)
-    except (TypeError, ValueError):
-        version = 2 if source == "header" else 1
+    if strict_v2:
+        if type(version_raw) is not int or version_raw != 2:
+            findings.append("strict-v2 requires integer x402Version == 2")
+            return ValidateResult(
+                ok=False,
+                failure_class="v2_header_invalid",
+                findings=findings,
+            )
+        version = 2
+    else:
+        try:
+            version = int(version_raw) if version_raw is not None else (2 if source == "header" else 1)
+        except (TypeError, ValueError):
+            version = 2 if source == "header" else 1
 
-    header_like = source == "header" or version >= 2
+    header_like = source == "header" or version >= 2 or strict_v2
     failure_class: str | None = None
 
     for item in accepts:
@@ -235,14 +255,18 @@ def validate_accepts(obj: dict[str, Any], *, source: str) -> ValidateResult:
             findings.append("accepts[] entry missing scheme")
             failure_class = failure_class or "scheme_unsupported"
         elif str(scheme) not in ("exact", "upto"):
-            # exact first-class; upto warning-level; unknown schemes are findings
-            # but do not hard-fail free tier (README / issue #3).
-            findings.append(f"unsupported scheme '{scheme}' (info)")
+            if strict_v2:
+                findings.append(f"unsupported scheme '{scheme}'")
+                failure_class = failure_class or "scheme_unsupported"
+            else:
+                # exact first-class; upto warning-level; unknown schemes are
+                # findings but do not hard-fail free tier (README / issue #3).
+                findings.append(f"unsupported scheme '{scheme}' (info)")
         if network is None:
             findings.append("accepts[] entry missing network")
             failure_class = failure_class or "network_format"
 
-        if header_like:
+        if header_like or strict_v2:
             amount = item.get("amount")
             if amount is None or str(amount).strip() == "":
                 findings.append("header/v2 accepts[] entry missing amount")
@@ -254,6 +278,20 @@ def validate_accepts(obj: dict[str, Any], *, source: str) -> ValidateResult:
             if network is not None and not _is_caip2(str(network)):
                 findings.append("network must be CAIP-2 (eip155:<n> or solana:<id>)")
                 failure_class = failure_class or "network_format"
+
+            if strict_v2:
+                asset = item.get("asset")
+                if asset is None or str(asset).strip() == "":
+                    findings.append("strict-v2 accepts[] entry missing asset")
+                    failure_class = failure_class or "v2_header_invalid"
+                pay_to = item.get("payTo")
+                if pay_to is None or str(pay_to).strip() == "":
+                    findings.append("strict-v2 accepts[] entry missing payTo")
+                    failure_class = failure_class or "v2_header_invalid"
+                timeout = item.get("maxTimeoutSeconds")
+                if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or timeout <= 0:
+                    findings.append("strict-v2 requires maxTimeoutSeconds number > 0")
+                    failure_class = failure_class or "v2_header_invalid"
         else:
             if _accept_price(item) is None:
                 findings.append("body accepts[] entry missing maxAmountRequired|amount|price")
