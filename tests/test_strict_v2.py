@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import os
 import re
@@ -9,7 +10,12 @@ from unittest import mock
 
 import validator
 from payment_required import decode_payment_required_header, validate_accepts
-from validator import check_402_body
+from validator import (
+    RAW_RESPONSE_BODY_MAX_BYTES,
+    REDACTED_HEADER_PLACEHOLDER,
+    build_raw_response,
+    check_402_body,
+)
 
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -136,26 +142,51 @@ class StrictV2Check402BodyTests(unittest.TestCase):
     @mock.patch("validator.requests.get")
     def test_check_402_body_strict_includes_raw_response_keys(self, mock_get, mock_post):
         obj = _strict_payment_required()
+        pr = _b64_json(obj)
         mock_get.return_value = MockResponse(
             402,
-            headers={"payment-required": _b64_json(obj), "content-type": "application/json"},
+            headers={
+                "payment-required": pr,
+                "content-type": "application/json",
+                "Set-Cookie": "session=secret",
+                "Authorization": "Bearer leaked-token",
+            },
             text="{}",
         )
         mock_post.return_value = MockResponse(404)
+        url = "https://example.test/paywalled"
 
-        result = check_402_body("https://example.test/paywalled", strict_v2=True)
+        result = check_402_body(url, strict_v2=True)
 
         self.assertTrue(result["passed"], result)
         self.assertTrue(result["strict_v2"])
         self.assertIn("raw_response", result)
         self.assertEqual(
             set(result["raw_response"]),
-            {"status_code", "headers", "body", "probed_at_utc"},
+            {
+                "method",
+                "url",
+                "status_code",
+                "headers",
+                "body",
+                "body_truncated",
+                "body_sha256",
+            },
         )
-        self.assertEqual(result["raw_response"]["status_code"], 402)
-        self.assertEqual(result["raw_response"]["headers"]["payment-required"], _b64_json(obj))
-        self.assertEqual(result["raw_response"]["body"], "{}")
-        self.assertRegex(result["raw_response"]["probed_at_utc"], ISO_Z_RE)
+        raw = result["raw_response"]
+        self.assertEqual(raw["method"], "GET")
+        self.assertEqual(raw["url"], url)
+        self.assertEqual(raw["status_code"], 402)
+        self.assertEqual(raw["headers"]["payment-required"], pr)
+        self.assertEqual(raw["headers"]["set-cookie"], REDACTED_HEADER_PLACEHOLDER)
+        self.assertEqual(raw["headers"]["authorization"], REDACTED_HEADER_PLACEHOLDER)
+        self.assertEqual(raw["body"], "{}")
+        self.assertFalse(raw["body_truncated"])
+        self.assertEqual(
+            raw["body_sha256"],
+            hashlib.sha256(b"{}").hexdigest(),
+        )
+        self.assertRegex(result["probed_at_utc"], ISO_Z_RE)
         mock_get.assert_called_once()
         mock_post.assert_not_called()
 
@@ -172,6 +203,39 @@ class StrictV2Check402BodyTests(unittest.TestCase):
         self.assertEqual(result["channel"], "body")
         self.assertTrue(result["legacy_placement"])
         self.assertIsNone(result["failure_class"])
+
+    def test_build_raw_response_truncates_large_body_and_hashes_full_original(self):
+        full_body = "x" * (RAW_RESPONSE_BODY_MAX_BYTES + 50)
+        full_sha = hashlib.sha256(full_body.encode("utf-8")).hexdigest()
+
+        raw = build_raw_response(
+            method="POST",
+            url="https://example.test/huge",
+            status_code=402,
+            headers={"Content-Type": "text/plain", "SET-COOKIE": "a=b"},
+            body_text=full_body,
+        )
+
+        self.assertEqual(raw["method"], "POST")
+        self.assertEqual(raw["url"], "https://example.test/huge")
+        self.assertTrue(raw["body_truncated"])
+        self.assertEqual(len(raw["body"].encode("utf-8")), RAW_RESPONSE_BODY_MAX_BYTES)
+        self.assertEqual(raw["body_sha256"], full_sha)
+        self.assertNotEqual(raw["body"], full_body)
+        self.assertEqual(raw["headers"]["set-cookie"], REDACTED_HEADER_PLACEHOLDER)
+        self.assertEqual(raw["headers"]["content-type"], "text/plain")
+
+    def test_build_raw_response_null_body_sha_when_no_body(self):
+        raw = build_raw_response(
+            method="GET",
+            url="https://example.test/empty",
+            status_code=402,
+            headers={},
+            body_text=None,
+        )
+        self.assertEqual(raw["body"], "")
+        self.assertFalse(raw["body_truncated"])
+        self.assertIsNone(raw["body_sha256"])
 
 
 class StrictV2ReportMainTests(unittest.TestCase):
@@ -200,10 +264,13 @@ class StrictV2ReportMainTests(unittest.TestCase):
                 "strict_v2": strict_v2,
                 "probed_at_utc": "2001-02-03T04:05:06Z",
                 "raw_response": {
+                    "method": "GET",
+                    "url": "https://example.test/paywalled",
                     "status_code": 402,
                     "headers": {},
                     "body": "",
-                    "probed_at_utc": "2001-02-03T04:05:06Z",
+                    "body_truncated": False,
+                    "body_sha256": hashlib.sha256(b"").hexdigest(),
                 },
                 "note": "ok",
             }

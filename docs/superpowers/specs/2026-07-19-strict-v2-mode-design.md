@@ -2,9 +2,10 @@
 
 Date: 2026-07-19
 Source: GitHub issue #1
-Scope: documentation/contract plus GitHub Action input wiring only. This task
-does not authorize implementing validator logic, modifying `payment_required.py`,
-or changing `check_402_body` behavior.
+Scope: documentation/contract plus GitHub Action input wiring only. The
+non-goals below describe the original contract-only task and predate the
+strict-v2 implementation that landed in the same PR (validator logic,
+`payment_required.py`, and `check_402_body`).
 
 ## Purpose
 
@@ -130,6 +131,11 @@ Until validator logic is implemented, wiring this input must not change default
 validation behavior.
 
 ## Non-goals for this contract task
+
+These non-goals applied to the original contract-only documentation task.
+They predate the implementation that landed in the same PR; that work
+intentionally implements verdict logic and updates `payment_required.py` /
+`check_402_body` to match this contract.
 
 - Do not implement strict-v2 verdict logic.
 - Do not modify `payment_required.py`.

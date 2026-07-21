@@ -37,6 +37,7 @@ Exit codes
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import statistics
@@ -66,6 +67,13 @@ P95_SAMPLE_COUNT = 5
 REQUIRED_402_KEYS = ("x402Version", "accepts", "error")
 REQUIRED_ACCEPT_KEYS = ("scheme", "network")
 PRICE_KEYS = ("maxAmountRequired", "amount", "price")
+
+# Archive limits for raw_response (strict-v2 design contract).
+# Cap keeps corpus reports bounded when a single endpoint returns a huge body.
+RAW_RESPONSE_BODY_MAX_BYTES = 64 * 1024  # 64 KiB
+# Headers that must never land in CI artifacts / corpus reports.
+REDACTED_RESPONSE_HEADERS = frozenset({"set-cookie", "authorization"})
+REDACTED_HEADER_PLACEHOLDER = "[REDACTED]"
 
 
 def log(msg: str) -> None:
@@ -234,6 +242,57 @@ def _utc_now() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
+def _redact_archived_headers(headers: dict[str, str]) -> dict[str, str]:
+    """Lowercase header names; redact secrets that must not land in reports."""
+    out: dict[str, str] = {}
+    for key, value in headers.items():
+        name = str(key).lower()
+        if name in REDACTED_RESPONSE_HEADERS:
+            out[name] = REDACTED_HEADER_PLACEHOLDER
+        else:
+            out[name] = str(value)
+    return out
+
+
+def _archive_response_body(body_text: str | None) -> tuple[str, bool, str | None]:
+    """Return (archived_body, body_truncated, body_sha256).
+
+    ``body_sha256`` is the SHA-256 hex digest of the full original body bytes
+    (UTF-8, replacement on encode errors). When the body exceeds
+    ``RAW_RESPONSE_BODY_MAX_BYTES``, the archived text is truncated and
+    ``body_truncated`` is True. ``body_sha256`` is None when no body was received.
+    """
+    if body_text is None:
+        return "", False, None
+    body_bytes = body_text.encode("utf-8", errors="replace")
+    body_sha256 = hashlib.sha256(body_bytes).hexdigest()
+    if len(body_bytes) > RAW_RESPONSE_BODY_MAX_BYTES:
+        truncated = body_bytes[:RAW_RESPONSE_BODY_MAX_BYTES]
+        return truncated.decode("utf-8", errors="replace"), True, body_sha256
+    return body_text, False, body_sha256
+
+
+def build_raw_response(
+    *,
+    method: str | None,
+    url: str,
+    status_code: int | None,
+    headers: dict[str, str],
+    body_text: str | None,
+) -> dict[str, Any]:
+    """Build the strict-v2 ``raw_response`` archive object (design field table)."""
+    archived_body, body_truncated, body_sha256 = _archive_response_body(body_text)
+    return {
+        "method": method,
+        "url": url,
+        "status_code": status_code,
+        "headers": _redact_archived_headers(headers),
+        "body": archived_body,
+        "body_truncated": body_truncated,
+        "body_sha256": body_sha256,
+    }
+
+
 def check_402_body(
     url: str,
     probe_method: str = "auto",
@@ -299,12 +358,13 @@ def check_402_body(
     is_402 = status == 402
     body_text = chosen.text if chosen.text is not None else ""
     headers = {str(k): str(v) for k, v in chosen.headers.items()}
-    raw_response = {
-        "status_code": status,
-        "headers": {k.lower(): v for k, v in headers.items()},
-        "body": body_text,
-        "probed_at_utc": probed_at_utc,
-    }
+    raw_response = build_raw_response(
+        method=chosen_method,
+        url=url,
+        status_code=status,
+        headers=headers,
+        body_text=body_text,
+    )
 
     extracted = extract_payment_required(status, headers, body_text)
     mismatch_fields = compare_channels(extracted.header_obj, extracted.body_obj)
