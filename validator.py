@@ -200,15 +200,43 @@ def check_manifest(url: str) -> dict[str, Any]:
     schema_ok = False
     schema_kind = "unknown"
     if isinstance(data, dict):
+        resources = data.get("resources")
         if "accepts" in data and isinstance(data["accepts"], list):
             schema_ok = bool(data["accepts"])
             schema_kind = "v1-accepts"
-        elif "resources" in data and "payment" in data:
-            schema_ok = isinstance(data["resources"], list) and bool(data["resources"])
+        elif resources is not None and "payment" in data:
+            schema_ok = isinstance(resources, list) and bool(resources)
             schema_kind = "v2-provider-payment"
+        elif (
+            isinstance(resources, list)
+            and resources
+            and all(isinstance(r, dict) for r in resources)
+            and any(isinstance(r.get("accepts"), list) and r["accepts"] for r in resources)
+        ):
+            # Per-resource payment terms (no top-level payment block): each
+            # resource entry carries its own accepts array. Seen in the wild
+            # (e.g. multi-resource providers); self-describing, so it passes.
+            schema_ok = True
+            schema_kind = "v2-resource-accepts"
+        elif (
+            isinstance(resources, list)
+            and resources
+            and all(isinstance(r, str) for r in resources)
+        ):
+            # Bare URL list: machine-readable inventory but carries no payment
+            # terms, so agents still need a live probe per resource.
+            schema_ok = False
+            schema_kind = "resource-list-bare"
         elif "endpoints" in data and isinstance(data["endpoints"], list):
             schema_ok = bool(data["endpoints"])
             schema_kind = "legacy-endpoints"
+
+    if schema_ok:
+        note = "manifest parsed and schema recognised"
+    elif schema_kind == "resource-list-bare":
+        note = "resource list without payment terms (no accepts per resource)"
+    else:
+        note = "manifest schema not recognised"
 
     return {
         "passed": schema_ok,
@@ -216,7 +244,7 @@ def check_manifest(url: str) -> dict[str, Any]:
         "status_code": resp.status_code,
         "schema_kind": schema_kind,
         "x402_version": data.get("x402Version") if isinstance(data, dict) else None,
-        "note": "manifest parsed and schema recognised" if schema_ok else "manifest schema not recognised",
+        "note": note,
     }
 
 
