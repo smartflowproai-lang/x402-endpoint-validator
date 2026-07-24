@@ -1,0 +1,35 @@
+{
+  "description": "Respuesta 402 con extensions.bazaar incompleto (solo method, faltan serviceName y tags) — debe fallar",
+  "request": {
+    "method": "GET",
+    "url": "https://pro-api.coinmarketcap.com/x402/v3/cryptocurrency/listings/latest"
+  },
+  "response": {
+    "status": 402,
+    "status_text": "Payment Required",
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "x-payment-required": "eyJuZXR3b3JrIjoic29sYW5hOkRTUE41MkJHc1FNQkNvZUVHRm1UR2dYa2U3UW1qNVhSIiwiYW1vdW50IjoiMTAwMDAwMCJ9"
+    },
+    "body": {
+      "status": "payment_required",
+      "statusCode": 402,
+      "error": "Payment required",
+      "message": "This endpoint requires x402 payment.",
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "solana:5Eytk4UsFv8P8NJdTREpY1vzqKqZKvdp",
+          "token": "SAN",
+          "amount": "100000"
+        }
+      ],
+      "extensions": {
+        "bazaar": {
+          "method": "POST",
+          "_note": "Faltan serviceName y tags — el checker debe reportar FAIL con los campos exactos que faltan"
+        }
+      }
+    }
+  }
+}

@@ -34,6 +34,11 @@ class JsonResilienceResult(CheckResult):
     details: Optional[dict[str, Any]] = None
 
 
+class BazaarResult(CheckResult):
+    check_name: Literal["bazaar_compliance"] = "bazaar_compliance"
+    details: Optional[dict[str, Any]] = None
+
+
 class AuditReport(BaseModel):
     target_url: str
     timestamp: datetime
@@ -243,6 +248,75 @@ class X402Auditor:
                 details={"status_code": None, "payload_type": None, "is_dict": None},
             )
 
+    @staticmethod
+    def check_bazaar_compliance(response_body: dict[str, Any]) -> BazaarResult:
+        extensions = response_body.get("extensions", {})
+        bazaar = extensions.get("bazaar")
+
+        if bazaar is None:
+            return BazaarResult(
+                status="FAIL",
+                message="Missing required 'extensions.bazaar' block in HTTP 402 response",
+                details={
+                    "bazaar_present": False,
+                    "bazaar_method": None,
+                    "bazaar_service_name": None,
+                    "bazaar_tags": None,
+                    "missing_fields": ["extensions.bazaar"],
+                },
+            )
+
+        missing: list[str] = []
+        bazaar_method = bazaar.get("method")
+        bazaar_service_name = bazaar.get("serviceName")
+        bazaar_tags = bazaar.get("tags")
+
+        if bazaar_method is None:
+            missing.append("extensions.bazaar.method")
+        elif bazaar_method != "POST":
+            return BazaarResult(
+                status="FAIL",
+                message=f"extensions.bazaar.method is '{bazaar_method}' but should be 'POST'",
+                details={
+                    "bazaar_present": True,
+                    "bazaar_method": bazaar_method,
+                    "bazaar_service_name": bazaar_service_name,
+                    "bazaar_tags": bazaar_tags,
+                    "missing_fields": [],
+                },
+            )
+
+        if bazaar_service_name is None or not isinstance(bazaar_service_name, str) or bazaar_service_name.strip() == "":
+            missing.append("extensions.bazaar.serviceName")
+
+        if bazaar_tags is None or not isinstance(bazaar_tags, list) or len(bazaar_tags) == 0:
+            missing.append("extensions.bazaar.tags")
+
+        if missing:
+            return BazaarResult(
+                status="FAIL",
+                message=f"Missing or invalid fields in extensions.bazaar: {', '.join(missing)}",
+                details={
+                    "bazaar_present": True,
+                    "bazaar_method": bazaar_method,
+                    "bazaar_service_name": bazaar_service_name,
+                    "bazaar_tags": bazaar_tags,
+                    "missing_fields": missing,
+                },
+            )
+
+        return BazaarResult(
+            status="PASS",
+            message="extensions.bazaar is complete and valid",
+            details={
+                "bazaar_present": True,
+                "bazaar_method": bazaar_method,
+                "bazaar_service_name": bazaar_service_name,
+                "bazaar_tags": bazaar_tags,
+                "missing_fields": [],
+            },
+        )
+
     async def run_full_audit(self, target_url: str) -> AuditReport:
         timestamp = datetime.now(timezone.utc)
         checks: list[CheckResult] = []
@@ -257,7 +331,10 @@ class X402Auditor:
         
         json_result = await self.test_json_resilience(target_url)
         checks.append(json_result)
-        
+
+        bazaar_result = await self._check_bazaar_from_response(target_url)
+        checks.append(bazaar_result)
+
         has_critical = any(c.status == "CRITICAL_FAIL" for c in checks)
         has_fail = any(c.status == "FAIL" for c in checks)
         has_error = any(c.status == "ERROR" for c in checks)
@@ -292,6 +369,34 @@ class X402Auditor:
         except Exception:
             pass
         return {}
+
+    async def _get_402_body(self, target_url: str) -> dict[str, Any] | None:
+        try:
+            url = target_url.rstrip("/") + "/"
+            response = await self._client.get(url)
+            if response.status_code == 402:
+                payload = response.json()
+                if isinstance(payload, dict):
+                    return payload
+        except Exception:
+            pass
+        return None
+
+    async def _check_bazaar_from_response(self, target_url: str) -> BazaarResult:
+        body = await self._get_402_body(target_url)
+        if body is None:
+            return BazaarResult(
+                status="PASS",
+                message="No 402 response body to check for bazaar compliance",
+                details={
+                    "bazaar_present": False,
+                    "bazaar_method": None,
+                    "bazaar_service_name": None,
+                    "bazaar_tags": None,
+                    "missing_fields": [],
+                },
+            )
+        return self.check_bazaar_compliance(body)
 
 
 async def run_audit(url: str, timeout: float = 10.0) -> AuditReport:

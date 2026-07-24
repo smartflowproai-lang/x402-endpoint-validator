@@ -404,13 +404,19 @@ class TestFullAudit:
         payment_payload = {"network": "eip155:8453"}
         encoded = base64.b64encode(json.dumps(payment_payload).encode()).decode()
         
-        # Mock base URL with trailing slash (for payment headers check)
+        bazaar_block = {
+            "method": "POST",
+            "serviceName": "example-service",
+            "tags": ["x402"],
+        }
+        
+        # Mock base URL with trailing slash (for payment headers + bazaar check)
         mock_client.add_response(
             "https://api.example.com/",
             httpx.Response(
                 402,
                 headers={"X-Payment-Required": encoded, "content-type": "application/json"},
-                json={"error": "Payment required", "accepts": []},
+                json={"error": "Payment required", "accepts": [], "extensions": {"bazaar": bazaar_block}},
                 request=httpx.Request("GET", "https://api.example.com/"),
             ),
         )
@@ -420,7 +426,7 @@ class TestFullAudit:
             httpx.Response(
                 402,
                 headers={"X-Payment-Required": encoded, "content-type": "application/json"},
-                json={"error": "Payment required", "accepts": []},
+                json={"error": "Payment required", "accepts": [], "extensions": {"bazaar": bazaar_block}},
                 request=httpx.Request("GET", "https://api.example.com"),
             ),
         )
@@ -430,7 +436,7 @@ class TestFullAudit:
         assert isinstance(report, AuditReport)
         assert report.overall_status == "PASS"
         assert report.target_url == "https://api.example.com"
-        assert len(report.checks) == 3
+        assert len(report.checks) == 4
         assert all(c.status == "PASS" for c in report.checks)
 
     @pytest.mark.asyncio
