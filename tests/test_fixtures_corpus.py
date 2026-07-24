@@ -117,6 +117,39 @@ class FixtureCorpusTests(unittest.TestCase):
     def test_l402_www_authenticate_only(self):
         self._assert_expect("l402_www_authenticate_only")
 
+    def test_viridis_regulatory_radar(self):
+        self._assert_expect("viridis_regulatory_radar")
+
+        case = self._load("viridis_regulatory_radar")
+        extracted = extract_payment_required(
+            case["status"], case["headers"], case["body"]
+        )
+        self.assertIsNotNone(extracted.header_obj)
+
+        bazaar = extracted.header_obj["extensions"]["bazaar"]
+        input_info = bazaar["info"]["input"]
+        input_schema = bazaar["schema"]["properties"]["input"]
+        body_schema = input_schema["properties"]["body"]
+
+        self.assertEqual(input_info["method"], "POST")
+        self.assertEqual(input_info["bodyType"], "json")
+        self.assertEqual(input_info["body"], case["request_body"])
+        self.assertEqual(
+            sorted(body_schema["properties"]),
+            ["jurisdiction", "query", "sector"],
+        )
+        self.assertFalse(body_schema["additionalProperties"])
+        self.assertEqual(
+            extracted.header_obj["resource"]["url"],
+            case["url"],
+        )
+        accepted = extracted.header_obj["accepts"][0]
+        provenance = case["provenance"]
+        self.assertTrue(provenance["settled_flow_confirmed"])
+        self.assertEqual(accepted["network"], provenance["network"])
+        self.assertEqual(accepted["amount"], provenance["amount_atomic_usdc"])
+        self.assertEqual(provenance["block"], 49064078)
+
 
 if __name__ == "__main__":
     unittest.main()
