@@ -7,6 +7,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY x402_conformance_engine.py .
 COPY x402_discord_bot.py .
-COPY batch_validator.py .
 
 CMD ["python", "x402_discord_bot.py"]
