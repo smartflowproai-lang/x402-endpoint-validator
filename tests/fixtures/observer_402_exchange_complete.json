@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "fixture_name": "Observer Marketplace Multi-Product x402 Exchange",
+    "source": "https://observer.137-184-67-179.sslip.io (production, Base mainnet)",
+    "captured_at": "2026-07-24T23:15:47Z",
+    "description": "Complete 3-phase exchange: manifest discovery + 2 product endpoint probes. All real production data, sanitized for timestamps.",
+    "x402_version": 2,
+    "network": "eip155:8453",
+    "network_label": "Base mainnet",
+    "has_bazaar": false,
+    "notes": [
+      "Product endpoints return empty JSON body {} with valid Payment-Required header",
+      "Bazaar block not implemented by Observer",
+      "All x402 fields (scheme, network, pay_to, facilitator_url, asset) present and valid"
+    ]
+  },
+  "test_cases": {
+    "manifest_discovery": {
+      "description": "GET /.well-known/x402 → 200 OK with products array",
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/x402"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "server": "Caddy, Werkzeug/3.1.8 Python/3.12.3",
+          "x-observer-service": "observer-x402-demo"
+        },
+        "body": {
+          "x402_discovery_version": "observer_discovery_v1",
+          "service_name": "Observer x402 Evidence Service",
+          "network": "eip155:8453",
+          "network_label": "Base mainnet",
+          "is_testnet": false,
+          "usdc_asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "facilitator_url": "https://api.cdp.coinbase.com/platform/v2/x402",
+          "seller_pay_to": "0xfDe7913aBE6E4A4e3e3134CF050dF9030aE8EF48",
+          "products": [
+            {
+              "id": "observer.evidence_summary_json.v1",
+              "name": "Observer Evidence Summary JSON",
+              "method": "GET",
+              "endpoint": "/paid/evidence-summary.json",
+              "price": {
+                "display": "$0.01",
+                "asset_symbol": "USDC",
+                "amount_base_units": "10000",
+                "decimals": 6
+              },
+              "x402": {
+                "scheme": "exact",
+                "network": "eip155:8453",
+                "pay_to": "0xfDe7913aBE6E4A4e3e3134CF050dF9030aE8EF48",
+                "facilitator_url": "https://api.cdp.coinbase.com/platform/v2/x402",
+                "asset_from_challenge": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+              },
+              "mime_type": "application/json; charset=utf-8",
+              "tags": ["observer", "market-structure", "evidence-ledger", "x402"]
+            },
+            {
+              "id": "observer.state_change_ledger_csv.v1",
+              "name": "Observer State-Change Ledger CSV",
+              "method": "GET",
+              "endpoint": "/paid/state-change-ledger",
+              "price": {
+                "display": "$0.05",
+                "asset_symbol": "USDC",
+                "amount_base_units": "50000",
+                "decimals": 6
+              },
+              "x402": {
+                "scheme": "exact",
+                "network": "eip155:8453",
+                "pay_to": "0xfDe7913aBE6E4A4e3e3134CF050dF9030aE8EF48",
+                "facilitator_url": "https://api.cdp.coinbase.com/platform/v2/x402",
+                "asset_from_challenge": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+              },
+              "mime_type": "text/csv; charset=utf-8",
+              "tags": ["observer", "csv", "ledger", "state-change", "x402"]
+            }
+          ]
+        }
+      }
+    },
+    "product_evidence_summary": {
+      "description": "GET /paid/evidence-summary.json → 402 Payment Required with valid Payment-Required header",
+      "request": {
+        "method": "GET",
+        "url": "/paid/evidence-summary.json"
+      },
+      "response": {
+        "status_code": 402,
+        "headers": {
+          "content-type": "application/json, application/json",
+          "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9vYnNlcnZlci4xMzctMTg0LTY3LTE3OS5zc2xpcC5pby9wYWlkL2V2aWRlbmNlLXN1bW1hcnkuanNvbiIsImRlc2NyaXB0aW9uIjoiTGl2ZSBCaXRjb2luIEJUQy1VU0QgbWFya2V0LXJlZ2ltZSwgdHJhZGluZy1zaWduYWwsIGFuZCByaXNrIGFuYWx5dGljcyBmb3IgYXV0b25vbW91cyBBSSBhZ2VudHMsIGFsZ29yaXRobWljIHRyYWRpbmcgc3lzdGVtcywgcG9ydGZvbGlvIG1vbml0b3JzLCBhbmQgcXVhbnRpdGF0aXZlIHdvcmtmbG93cy4gUmV0dXJucyB0aW1lc3RhbXBlZCBtYXJrZXQgcGhhc2UsIGNvaGVyZW5jZSwgY29tbWl0bWVudCwgZGlyZWN0aW9uYWwgcHJlc3N1cmUsIGNvbmZpZGVuY2UsIGVuZXJneSwgY3VycmVudCBzaWduYWwsIGFuZCByZWNlbnQgcmVnaW1lIHRyYW5zaXRpb25zIGZvciBkZWNpc2lvbiBzdXBwb3J0IGFuZCByaXNrIG1vbml0b3JpbmcuIEV4cGVyaW1lbnRhbCBhbmFseXRpY3Mgb25seTsgbm90IGZpbmFuY2lhbCBhZHZpY2UuIiwibWltZVR5cGUiOiJhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PXV0Zi04Iiwic2VydmljZU5hbWUiOiJPYnNlcnZlciBCVEMgTGl2ZSBSZWdpbWUgYW5kIFJpc2sgQVBJIiwidGFncyI6WyJiaXRjb2luIiwiYnRjIiwiYnRjLXVzZCIsInRyYWRpbmctc2lnbmFsIiwibWFya2V0LXJlZ2ltZSIsInJpc2stYW5hbHl0aWNzIiwibWFya2V0LWRhdGEiLCJhaS1hZ2VudHMiLCJhbGdvcml0aG1pYy10cmFkaW5nIiwieDQwMiJdfSwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhc3NldCI6IjB4ODMzNTg5ZkNENmVEYjZFMDhmNGM3QzMyRDRmNzFiNTRiZEEwMjkxMyIsImFtb3VudCI6IjEwMDAwIiwicGF5VG8iOiIweGZEZTc5MTNhQkU2RTRBNGUzZTMxMzRDRjA1MGRGOTAzMGFFOEVGNDgiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJuYW1lIjoiVVNEIENvaW4iLCJ2ZXJzaW9uIjoiMiJ9fV0sImV4dGVuc2lvbnMiOnsiYmF6YWFyIjp7ImluZm8iOnsiaW5wdXQiOnsidHlwZSI6Imh0dHAiLCJxdWVyeVBhcmFtcyI6eyJsaW1pdCI6MjV9LCJtZXRob2QiOiJHRVQifSwib3V0cHV0Ijp7InR5cGUiOiJqc29uIiwiZXhhbXBsZSI6eyJnZW5lcmF0ZWRfYXQiOiIyMDI2LTA3LTI0VDE2OjAwOjAwWiIsInNvdXJjZSI6ImJ0Y19vYnNlcnZlciIsInN1bW1hcnkiOnsic3ltYm9sIjoiQlRDLVVTRCIsInByaWNlIjoxMTg0NTAuMjUsIm1hcmtldF9zdGF0ZSI6IlRSQU5TSVRJT04iLCJtYXJrZXRfcGhhc2UiOiJFWFBBTlNJT04iLCJjb2hlcmVuY2Vfc2NvcmUiOjAuNzgsImNvbW1pdG1lbnRfc2NvcmUiOjAuNzEsInByZXNzdXJlX3NpZGUiOiJVUCIsInByZXNzdXJlX3Njb3JlIjowLjY2LCJjb25maWRlbmNlIjowLjc0LCJlbmVyZ3kiOjAuNTksInNpZ25hbCI6IldBSVQifSwic3RhdGVfY2hhbmdlX2V2ZW50cyI6W3siZXZlbnRfdGltZSI6IjIwMjYtMDctMjRUMTU6NTk6NDVaIiwiZXZlbnRfdHlwZSI6InN0YXRlX2NoYW5nZSIsImZyb21fc3RhdGUiOiJMT0FESU5HIiwidG9fc3RhdGUiOiJUUkFOU0lUSU9OIiwicmVhc29uIjoiY29oZXJlbmNlX3Jpc2luZyJ9XSwiYWxsX2V2ZW50cyI6MzgzfX19LCJzY2hlbWEiOnsiJHNjaGVtYSI6Imh0dHBzOi8vanNvbi1zY2hlbWEub3JnL2RyYWZ0LzIwMjAtMTIvc2NoZW1hIiwidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsiaW5wdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIiwiY29uc3QiOiJodHRwIn0sIm1ldGhvZCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJHRVQiLCJIRUFEIiwiREVMRVRFIl19LCJxdWVyeVBhcmFtcyI6eyJ0eXBlIjoib2JqZWN0IiwiZGVzY3JpcHRpb24iOiJPcHRpb25hbCBxdWVyeSBwYXJhbWV0ZXJzIGZvciB0aGUgT2JzZXJ2ZXIgZXZpZGVuY2Utc3VtbWFyeSBwcm9kdWN0LiIsInByb3BlcnRpZXMiOnsibGltaXQiOnsidHlwZSI6ImludGVnZXIiLCJtaW5pbXVtIjoxLCJtYXhpbXVtIjoxMDAsImRlc2NyaXB0aW9uIjoiTWF4aW11bSBudW1iZXIgb2Ygc3RhdGUtY2hhbmdlIGV2ZW50cyByZXR1cm5lZC4ifX0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZX19LCJyZXF1aXJlZCI6WyJ0eXBlIiwibWV0aG9kIl0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZX0sIm91dHB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmcifSwiZXhhbXBsZSI6eyJ0eXBlIjoib2JqZWN0IiwiZGVzY3JpcHRpb24iOiJMaXZlIEJUQy1VU0QgcmVnaW1lLCBzaWduYWwsIHByZXNzdXJlLCBjb25maWRlbmNlLCBhbmQgc3RhdGUtdHJhbnNpdGlvbiBldmlkZW5jZSBmb3IgYXV0b25vbW91cyBhZ2VudHMuIiwicHJvcGVydGllcyI6eyJnZW5lcmF0ZWRfYXQiOnsidHlwZSI6WyJzdHJpbmciLCJudWxsIl0sImZvcm1hdCI6ImRhdGUtdGltZSJ9LCJzb3VyY2UiOnsidHlwZSI6WyJzdHJpbmciLCJudWxsIl19LCJzdW1tYXJ5Ijp7InR5cGUiOiJvYmplY3QiLCJkZXNjcmlwdGlvbiI6IkN1cnJlbnQgQml0Y29pbiBtYXJrZXQgcmVnaW1lIGFuZCBzaWduYWwgZmllbGRzLiIsImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjp0cnVlfSwic3RhdGVfY2hhbmdlX2V2ZW50cyI6eyJ0eXBlIjoiYXJyYXkiLCJkZXNjcmlwdGlvbiI6IlJlY2VudCBCaXRjb2luIHJlZ2ltZSBhbmQgc3RhdGUgdHJhbnNpdGlvbnMuIiwiaXRlbXMiOnsidHlwZSI6Im9iamVjdCIsImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjp0cnVlfX0sImFsbF9ldmVudHMiOnsidHlwZSI6WyJpbnRlZ2VyIiwibnVsbCJdLCJtaW5pbXVtIjowfX0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjp0cnVlfX0sInJlcXVpcmVkIjpbInR5cGUiXX19LCJyZXF1aXJlZCI6WyJpbnB1dCJdfX19fQ==",
+          "x-observer-service": "observer-x402-demo"
+        },
+        "body": {}
+      },
+      "validation": {
+        "expected_status": 402,
+        "requires_payment_header": true,
+        "payment_header_name": "payment-required",
+        "payment_header_decodable": true,
+        "expected_scheme": "exact",
+        "expected_network": "eip155:8453",
+        "expected_pay_to": "0xfDe7913aBE6E4A4e3e3134CF050dF9030aE8EF48",
+        "expected_amount": "10000",
+        "has_bazaar": false,
+        "bazaar_valid": false
+      }
+    },
+    "product_state_ledger": {
+      "description": "GET /paid/state-change-ledger → 402 Payment Required with valid Payment-Required header",
+      "request": {
+        "method": "GET",
+        "url": "/paid/state-change-ledger"
+      },
+      "response": {
+        "status_code": 402,
+        "headers": {
+          "content-type": "application/json, application/json",
+          "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9vYnNlcnZlci4xMzctMTg0LTY3LTE3OS5zc2xpcC5pby9wYWlkL3N0YXRlLWNoYW5nZS1sZWRnZXIiLCJkZXNjcmlwdGlvbiI6Ikhpc3RvcmljYWwgQml0Y29pbiBCVEMtVVNEIG1hcmtldC1yZWdpbWUgYW5kIHN0YXRlLXRyYW5zaXRpb24gZGF0YXNldCBpbiBDU1YgZm9yIHF1YW50aXRhdGl2ZSBiYWNrdGVzdGluZywgc3RyYXRlZ3kgcmVzZWFyY2gsIG1vZGVsIGV2YWx1YXRpb24sIGF1ZGl0IHRyYWlscywgYW5kIGF1dG9ub21vdXMtYWdlbnQgZGVjaXNpb24gdHJhY2VhYmlsaXR5LiBJbmNsdWRlcyB0aW1lc3RhbXBzLCBwcmljZSBhdCBzaWduYWwsIG1hcmtldCBzdGF0ZSwgcGhhc2UsIGNvaGVyZW5jZSwgY29tbWl0bWVudCwgZGlyZWN0aW9uYWwgcHJlc3N1cmUsIHNpZ25hbCBsYWJlbHMsIHJlYWRpbmVzcywgYW5kIHRyYW5zaXRpb24gcmVhc29uLiBFeHBlcmltZW50YWwgYW5hbHl0aWNzIG9ubHk7IG5vdCBmaW5hbmNpYWwgYWR2aWNlLiIsIm1pbWVUeXBlIjoidGV4dC9jc3Y7IGNoYXJzZXQ9dXRmLTgiLCJzZXJ2aWNlTmFtZSI6Ik9ic2VydmVyIEJUQyBIaXN0b3JpY2FsIFJlZ2ltZSBMZWRnZXIiLCJ0YWdzIjpbImJpdGNvaW4iLCJidGMiLCJidGMtdXNkIiwiYmFja3Rlc3RpbmciLCJoaXN0b3JpY2FsLWRhdGEiLCJzdGF0ZS10cmFuc2l0aW9ucyIsIm1hcmtldC1yZWdpbWUiLCJxdWFudGl0YXRpdmUtcmVzZWFyY2giLCJjc3YiLCJ4NDAyIl19LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwiYW1vdW50IjoiNTAwMDAiLCJwYXlUbyI6IjB4ZkRlNzkxM2FCRTZFNEE0ZTNlMzEzNENGMDUwZEY5MDMwYUU4RUY0OCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19XSwiZXh0ZW5zaW9ucyI6eyJiYXphYXIiOnsiaW5mbyI6eyJpbnB1dCI6eyJ0eXBlIjoiaHR0cCIsInF1ZXJ5UGFyYW1zIjp7ImxpbWl0IjoxMDB9LCJtZXRob2QiOiJHRVQifSwib3V0cHV0Ijp7InR5cGUiOiJqc29uIiwiZXhhbXBsZSI6ImV2ZW50X2lkLGNyZWF0ZWRfYXQsZXZlbnRfdGltZSxzeW1ib2wsbGVkZ2VyX3R5cGUsc291cmNlLHByaWNlX2F0X3NpZ25hbCxtYXJrZXRfc3RhdGVfYXRfc2lnbmFsLG1hcmtldF9waGFzZV9hdF9zaWduYWwsbWFya2V0X3ByZXNzdXJlX2F0X3NpZ25hbCxhbGVydF9sYWJlbCxjb21wbGV0aW9uX3JlYWRpbmVzc19zY29yZVxuZXhhbXBsZS0xLDIwMjYtMDctMjRUMTY6MDA6MDBaLDIwMjYtMDctMjRUMTU6NTk6NDVaLEJUQy1VU0Qsc3RhdGVfY2hhbmdlLG9ic2VydmVyLDExODQ1MC4yNSxUUkFOU0lUSU9OLEVYUEFOU0lPTixVUCxXQUlULDAuNzRcbiJ9fSwic2NoZW1hIjp7IiRzY2hlbWEiOiJodHRwczovL2pzb24tc2NoZW1hLm9yZy9kcmFmdC8yMDIwLTEyL3NjaGVtYSIsInR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7ImlucHV0Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InR5cGUiOnsidHlwZSI6InN0cmluZyIsImNvbnN0IjoiaHR0cCJ9LCJtZXRob2QiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsiR0VUIiwiSEVBRCIsIkRFTEVURSJdfSwicXVlcnlQYXJhbXMiOnsidHlwZSI6Im9iamVjdCIsImRlc2NyaXB0aW9uIjoiT3B0aW9uYWwgcXVlcnkgcGFyYW1ldGVycyBmb3IgdGhlIE9ic2VydmVyIHN0YXRlLWNoYW5nZSBsZWRnZXIuIiwicHJvcGVydGllcyI6eyJsaW1pdCI6eyJ0eXBlIjoiaW50ZWdlciIsIm1pbmltdW0iOjEsIm1heGltdW0iOjEwMDAsImRlc2NyaXB0aW9uIjoiTWF4aW11bSBudW1iZXIgb2YgQ1NWIGRhdGEgcm93cyByZXR1cm5lZC4gVGhlIGhlYWRlciByb3cgaXMgYWx3YXlzIGluY2x1ZGVkLiJ9fSwiYWRkaXRpb25hbFByb3BlcnRpZXMiOmZhbHNlfX0sInJlcXVpcmVkIjpbInR5cGUiLCJtZXRob2QiXSwiYWRkaXRpb25hbFByb3BlcnRpZXMiOmZhbHNlfSwib3V0cHV0Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InR5cGUiOnsidHlwZSI6InN0cmluZyJ9LCJleGFtcGxlIjp7InR5cGUiOiJzdHJpbmciLCJkZXNjcmlwdGlvbiI6IkNTViBkYXRhc2V0IG9mIHRpbWVzdGFtcGVkIEJUQy1VU0QgbWFya2V0IHJlZ2ltZXMsIHNpZ25hbHMsIHByZXNzdXJlLCByZWFkaW5lc3MsIGFuZCBzdGF0ZSB0cmFuc2l0aW9ucyBmb3IgcXVhbnRpdGF0aXZlIGJhY2t0ZXN0aW5nIGFuZCBhZ2VudCBhdWRpdCB0cmFpbHMuIiwiY29udGVudE1lZGlhVHlwZSI6InRleHQvY3N2IiwibWluTGVuZ3RoIjoxfX0sInJlcXVpcmVkIjpbInR5cGUiXX19LCJyZXF1aXJlZCI6WyJpbnB1dCJdfX19fQ==",
+          "x-observer-service": "observer-x402-demo"
+        },
+        "body": {}
+      },
+      "validation": {
+        "expected_status": 402,
+        "requires_payment_header": true,
+        "payment_header_name": "payment-required",
+        "payment_header_decodable": true,
+        "expected_scheme": "exact",
+        "expected_network": "eip155:8453",
+        "expected_pay_to": "0xfDe7913aBE6E4A4e3e3134CF050dF9030aE8EF48",
+        "expected_amount": "50000",
+        "has_bazaar": false,
+        "bazaar_valid": false
+      }
+    }
+  }
+}
