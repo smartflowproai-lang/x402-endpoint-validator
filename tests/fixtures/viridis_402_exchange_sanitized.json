@@ -1,0 +1,54 @@
+{
+  "description": "HTTP exchange real capturado en Viridis (sanitizado). Tokens, wallets y datos sensibles reemplazados.",
+  "original_source": "Captura de Tom — Viridis environment, 2026-07-24",
+  "request": {
+    "method": "GET",
+    "url": "https://pro-api.coinmarketcap.com/x402/v3/cryptocurrency/listings/latest",
+    "headers": {
+      "accept": "application/json",
+      "X-CMC_PRO_API_KEY": "<SANITIZED-API-KEY>",
+      "user-agent": "x402-conformance-bot/1.0"
+    }
+  },
+  "response": {
+    "status": 402,
+    "status_text": "Payment Required",
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "x-payment-required": "eyJuZXR3b3JrIjoic29sYW5hIiwiY2hhaW5JZCI6InNvbGFuYTpEU1BONTJCR3NRTUJDb2VHRkxtVEdnWGtlN1FtajVYUiIsInBheW1lbnRJZCI6IjB4MjM0NzE2MjM0NzE2MjM0NzE2MjM0NzE2MjM0NzE2MjM0NzE2MjM0IiwiYW1vdW50IjoiMTAwMDAwMCIsInRva2VuIjoiPHNhbml0aXplZD50b2tlbj4iLCJyZWNlaXB0IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMCJ9",
+      "x-402-accepts": "eyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJzb2xhbmE6NUV5a3Q0VXNGdjhQOE5KZFRSRXBZMXZ6cUtxWkt2ZHAiLCJ0b2tlbiI6IlNBTiIsImFtb3VudCI6IjEwMDAwMCJ9",
+      "www-authenticate": "x402 eyJuZXR3b3JrIjoic29sYW5hOjVFeWt0NFVzRnY4UDhOSmRUUkVwWTF2enFLcVpLdmRwIiwicGF5bWVudElkIjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMCJ9",
+      "x-request-id": "<SANITIZED-REQUEST-ID>",
+      "x-cache": "miss",
+      "date": "Fri, 24 Jul 2026 10:00:00 GMT",
+      "server": "<SANITIZED-SERVER>"
+    },
+    "body": {
+      "status": "payment_required",
+      "statusCode": 402,
+      "error": "Payment required for x402 access",
+      "message": "This endpoint requires a valid x402 payment. Use the x-payment-required header to submit payment.",
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "solana:5Eytk4UsFv8P8NJdTREpY1vzqKqZKvdp",
+          "token": "SAN",
+          "amount": "100000"
+        }
+      ],
+      "extensions": {
+        "bazaar": {
+          "method": "POST",
+          "serviceName": "viridis-cmc-proxy",
+          "tags": ["x402", "viridis", "cmc"],
+          "endpoint": "https://bazaar.viridis.io/api/v1/payments",
+          "description": "Servicio de proxy para CoinMarketCap con autenticacion x402"
+        }
+      },
+      "_sanitized": {
+        "note": "API keys, tokens y direcciones de wallet reemplazados con valores sanitizados",
+        "original_fields_removed": ["X-CMC_PRO_API_KEY", "x-request-id", "server", "paymentId", "token", "receipt"]
+      }
+    }
+  }
+}
