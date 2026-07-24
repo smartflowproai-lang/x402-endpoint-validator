@@ -6,3 +6,4 @@ venv/
 dist/
 build/
 .pytest_cache/
+bot.log
