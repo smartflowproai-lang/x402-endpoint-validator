@@ -1,82 +1,78 @@
-# x402 Conformance Validator
+# x402-validator
 
-Suite de herramientas para auditar endpoints contra el estándar **x402 strict-v2**.
+Audita, monitorea y protege endpoints contra el estándar **x402 strict-v2**. Incluye un motor de chequeos (manifest discovery, CAIP-2, JSON resilience, Bazaar), CLI para auditorías masivas, servidor MCP para integración con agents/IDEs, dashboard web con históricos y proxy inverso que empaqueta validación en cada request.
 
-## Componentes
+```bash
+pip install x402-validator
+# o: pip install "x402-validator[all]"  # dashboard + proxy
+```
 
-| Módulo | Archivo | Propósito |
-|---|---|---|
-| **Engine** | `x402_conformance_engine.py` | Auditoría base: manifest discovery, CAIP-2 compliance, JSON resilience, bazaar checker |
-| **Batch** | `batch_validator.py` | Validación por lote desde CSV con concurrencia controlada |
-| **Bot** | `x402_discord_bot.py` | Bot de Discord con comandos `/x402` y `/x402ai` |
-| **Proxy** | `x402_proxy_server.py` | Proxy inverso que envuelve respuestas 402 no-dict para evitar crashes en Bazaar |
-| **Bazaar Checker** | (en el engine) | Verifica que `extensions.bazaar` esté completo y tenga `method: POST`, `serviceName`, `tags` |
+## 4 ejemplos de uso
+
+### CLI — auditar 100 endpoints desde un archivo
+
+```bash
+x402-validate endpoints.txt --output html --parallel 20
+```
+
+### MCP — conectar desde Claude / Cursor / cualquier cliente MCP
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | x402-mcp
+```
+
+### Dashboard — ver históricos y tendencias
+
+```bash
+python main.py dashboard
+# Abrir http://localhost:5000
+```
+
+### Proxy — validar en cada request
+
+```bash
+python main.py proxy
+curl http://localhost:8080/forward/https://api.example.com/data
+# Headers: X-Validation-Status, X-Validation-Report
+```
 
 ## Tests
 
 ```bash
-pip install -r requirements.txt
-pip install pytest pytest-asyncio
-
-# Todos los tests
-python -m pytest
-
-# Por componente
-python -m pytest test_x402_conformance_engine.py -v   # Engine + Bazaar
-python -m pytest test_batch_validator.py -v            # Batch
-python -m pytest test_x402_discord_bot.py -v           # Bot
-python -m pytest test_x402_proxy_server.py -v          # Proxy
-python -m pytest test_bazaar_checker.py -v             # Bazaar Checker
+pip install -e ".[all]" pytest pytest-asyncio
+python -m pytest test_*.py -v
 ```
 
-## GitHub Action — copiar en 2 minutos
+---
 
-1. En tu repo, crea `.github/workflows/x402-validator.yml`
-2. Copia esto:
+## Real-World Validation
 
-```yaml
-name: x402 Validator
-on: [push]
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install deps
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio
-      - name: Run tests
-        run: python -m pytest -v
-```
+We validate the x402-validator against production endpoints:
 
-3. Pushea el archivo. El action corre automáticamente en cada push.
+- **Observer Marketplace** (Base mainnet)
+  - 2 products, real USDC payments
+  - 7/10 checks pass
+  - See: [Validation Report](docs/VALIDATION_OBSERVER.md)
 
-Si algún test falla (headers rotos, extensión Bazaar faltante, CAIP-2 inválido), el build falla y te dice exactamente qué arreglar.
+This ensures the validator works against real,
+complex x402 implementations in production.
 
-## Uso local
+## Contribuir
 
-```bash
-# Auditar un endpoint
-python x402_conformance_engine.py https://api.example.com
+Ver [CONTRIBUTING.md](CONTRIBUTING.md).
 
-# Batch desde CSV
-python batch_validator.py endpoints.csv --concurrency 25
+## Roadmap
 
-# Proxy
-python x402_proxy_server.py
+- [x] CLI con salida csv/json/html
+- [x] MCP server (JSON-RPC 2.0 sobre stdio)
+- [x] Dashboard web con históricos
+- [x] Proxy middleware validante
+- [x] Docker compose + CI
+- [ ] Publicación en PyPI
+- [ ] Plugin para GitHub Actions
+- [ ] Modo watch / daemon
+- [ ] Webhooks (Slack, email)
 
-# Bot (necesita token Discord)
-DISCORD_TOKEN=... python x402_discord_bot.py
-```
+---
 
-## Fixtures
-
-Los archivos de prueba están en `tests/fixtures/`:
-
-- `viridis_402_exchange_sanitized.json` — Intercambio HTTP real capturado en Viridis (sanitizado)
-- `bazaar_missing_block.json` — Respuesta 402 sin `extensions.bazaar`
-- `bazaar_missing_fields.json` — Respuesta 402 con `extensions.bazaar` incompleto
+Parte del ecosistema [x402-endpoint-validator](https://github.com/smartflowproai-lang/x402-endpoint-validator).
