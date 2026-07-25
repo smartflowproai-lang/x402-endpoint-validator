@@ -216,13 +216,15 @@ async def audit_async(
 
 def audit_command(
     input_file: str,
-    output: str = "csv",
+    output: list[str] | None = None,
     parallel: int = 5,
     timeout: float = 10.0,
     output_path: str | None = None,
     results: list[AuditReport] | None = None,
     mode: str = "standard",
 ) -> None:
+    if output is None:
+        output = ["csv"]
     if results is None:
         urls = read_urls_from_file(input_file)
         if not urls:
@@ -231,18 +233,16 @@ def audit_command(
         print(f"Read {len(urls)} URLs from {input_file}", file=sys.stderr)
         results = asyncio.run(run_batch(urls, parallel=parallel, timeout=timeout, mode=mode))
 
-    if output_path is None:
-        base = os.path.splitext(input_file)[0]
-        output_path = f"{base}_results.{output}"
+    writers = {"csv": write_csv, "json": write_json, "html": write_html}
+    base = os.path.splitext(input_file)[0]
+    for fmt in output:
+        if output_path and len(output) == 1:
+            path = output_path
+        else:
+            path = f"{base}_results.{fmt}"
+        writers[fmt](results, path)
+        print(f"Results written to: {path}", file=sys.stderr)
 
-    if output == "csv":
-        write_csv(results, output_path)
-    elif output == "json":
-        write_json(results, output_path)
-    elif output == "html":
-        write_html(results, output_path)
-
-    print(f"Results written to: {output_path}", file=sys.stderr)
     print_summary(results)
 
 
@@ -258,7 +258,7 @@ def main() -> None:
         ),
     )
     parser.add_argument("input_file", help="File with one URL per line")
-    parser.add_argument("--output", choices=["csv", "json", "html"], default="csv", help="Output format")
+    parser.add_argument("--output", nargs="*", choices=["csv", "json", "html"], default=["csv"], help="Output format(s): csv, json, html")
     parser.add_argument("--parallel", type=int, default=5, help="Concurrent workers (default: 5)")
     parser.add_argument("--timeout", type=float, default=10.0, help="Request timeout in seconds")
     parser.add_argument("--output-path", help="Output file path (default: <input>_results.<ext>)")

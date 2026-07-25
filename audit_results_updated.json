@@ -1,0 +1,1490 @@
+{
+  "generated_at": "2026-07-25T04:05:32.305104+00:00",
+  "total": 27,
+  "summary": {
+    "pass": 0,
+    "warn": 0,
+    "fail": 27,
+    "error": 0,
+    "common_gaps": [
+      {
+        "check": "caip2_compliance",
+        "count": 27
+      },
+      {
+        "check": "manifest_discovery",
+        "count": 25
+      },
+      {
+        "check": "json_resilience",
+        "count": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "target_url": "https://bazaar.viridis.io",
+      "timestamp": "2026-07-25T04:05:26.325176Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "ERROR",
+          "message": "Connection error: [Errno -2] Name or service not known",
+          "details": {
+            "url": "https://bazaar.viridis.io/.well-known/x402",
+            "status_code": null,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "ERROR",
+          "message": "Connection error: [Errno -2] Name or service not known",
+          "details": {
+            "status_code": null,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "1/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://counterra.xyz",
+      "timestamp": "2026-07-25T04:05:26.303728Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://counterra.xyz/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://stabletravel.dev",
+      "timestamp": "2026-07-25T04:05:26.309023Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://stabletravel.dev/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://x402.asterpay.io",
+      "timestamp": "2026-07-25T04:05:26.330533Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "PASS",
+          "message": "Manifest discovered and contains 'accepts' key",
+          "details": {
+            "url": "https://x402.asterpay.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": true,
+            "has_products": false,
+            "headers": {
+              "date": "Sat, 25 Jul 2026 04:05:22 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE, WWW-Authenticate, Payment-Receipt",
+              "cache-control": "no-store, no-cache, must-revalidate",
+              "content-security-policy": "default-src 'self';script-src 'self' 'unsafe-inline';style-src 'self' 'unsafe-inline';img-src 'self' data: https:;connect-src 'self' https:;base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';object-src 'none';script-src-attr 'none';upgrade-insecure-requests",
+              "cross-origin-resource-policy": "cross-origin",
+              "origin-agent-cluster": "?1",
+              "referrer-policy": "no-referrer",
+              "server": "cloudflare",
+              "strict-transport-security": "max-age=15552000; includeSubDomains",
+              "x-content-type-options": "nosniff",
+              "x-dns-prefetch-control": "off",
+              "x-download-options": "noopen",
+              "x-frame-options": "SAMEORIGIN",
+              "x-permitted-cross-domain-policies": "none",
+              "x-railway-request-id": "W2QrA9OTTX-xbE149o6EoQ",
+              "x-ratelimit-limit": "1000",
+              "x-ratelimit-remaining": "995",
+              "x-ratelimit-reset": "25",
+              "x-xss-protection": "0",
+              "content-encoding": "gzip",
+              "x-hikari-trace": "atl1.1v22",
+              "x-railway-edge": "atl1",
+              "vary": "accept-encoding",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=LOMfGorxZK4gniQtsuQAhfuxlVlMEU1Ksf4JO%2Fy5SlSJUMPEIU6mrQPVW2ZtKJdDGu3zVBiV%2Bls40t7l2THmOcZ0%2FZE7IoxW4tKavk1bL9GkDVHTQuPUR3gIWlPzCoGqy%2F0g\"}]}",
+              "cf-ray": "a208493099f047a4-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "3/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://call.kelam.sh",
+      "timestamp": "2026-07-25T04:05:26.341257Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://call.kelam.sh/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402, check not applicable)",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://pro-api.coinmarketcap.com",
+      "timestamp": "2026-07-25T04:05:26.363715Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://pro-api.coinmarketcap.com/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402, check not applicable)",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.smartflowproai.com",
+      "timestamp": "2026-07-25T04:05:26.294548Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://api.smartflowproai.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://intel.hugen.tokyo",
+      "timestamp": "2026-07-25T04:05:26.335836Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://intel.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://defi.hugen.tokyo",
+      "timestamp": "2026-07-25T04:05:26.319863Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://defi.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402, check not applicable)",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.x402scan.com",
+      "timestamp": "2026-07-25T04:05:26.346694Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://www.x402scan.com/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.kaspa-402.org",
+      "timestamp": "2026-07-25T04:05:27.666999Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://www.kaspa-402.org/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://data.greeneris.io",
+      "timestamp": "2026-07-25T04:05:27.446688Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://data.greeneris.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://mcp.hugen.tokyo",
+      "timestamp": "2026-07-25T04:05:27.137364Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://mcp.hugen.tokyo/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402, check not applicable)",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.hyperextend.xyz",
+      "timestamp": "2026-07-25T04:05:26.314660Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://api.hyperextend.xyz/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://toolrail.dev",
+      "timestamp": "2026-07-25T04:05:27.931784Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://toolrail.dev/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.cloudworldmodel.ai",
+      "timestamp": "2026-07-25T04:05:28.071376Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest response is not valid JSON",
+          "details": {
+            "url": "https://www.cloudworldmodel.ai/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://ozmium.org",
+      "timestamp": "2026-07-25T04:05:28.085657Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://ozmium.org/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.x-402.online",
+      "timestamp": "2026-07-25T04:05:27.870233Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://api.x-402.online/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://whale.hugen.tokyo",
+      "timestamp": "2026-07-25T04:05:28.039135Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://whale.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402, check not applicable)",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.web3identity.com",
+      "timestamp": "2026-07-25T04:05:28.948164Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://api.web3identity.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agent.weatherxm.com",
+      "timestamp": "2026-07-25T04:05:28.330010Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://agent.weatherxm.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://observer.137-184-67-179.sslip.io",
+      "timestamp": "2026-07-25T04:05:28.988638Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "PASS",
+          "message": "Manifest discovered with 2 products in marketplace catalog",
+          "details": {
+            "url": "https://observer.137-184-67-179.sslip.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": true,
+            "product_count": 2,
+            "headers": {
+              "alt-svc": "h3=\":443\"; ma=2592000",
+              "content-encoding": "gzip",
+              "content-type": "application/json",
+              "date": "Sat, 25 Jul 2026 04:05:25 GMT",
+              "server": "Caddy, Werkzeug/3.1.8 Python/3.12.3",
+              "vary": "Accept-Encoding",
+              "x-observer-boundary": "mainnet-live x402 adapter; experimental analytics only; not financial advice",
+              "x-observer-service": "observer-x402-demo",
+              "content-length": "1812"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "3/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://mcp.viridisconservation.com",
+      "timestamp": "2026-07-25T04:05:28.952977Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://mcp.viridisconservation.com/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agents.oromi.co.uk",
+      "timestamp": "2026-07-25T04:05:28.765642Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://agents.oromi.co.uk/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agentic.market",
+      "timestamp": "2026-07-25T04:05:28.824867Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint returned HTTP 404",
+          "details": {
+            "url": "https://agentic.market/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://verify.smartflowproai.com",
+      "timestamp": "2026-07-25T04:05:28.805743Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://verify.smartflowproai.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://apinow.fun",
+      "timestamp": "2026-07-25T04:05:29.428849Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest JSON missing required 'accepts' key and has no 'products' array",
+          "details": {
+            "url": "https://apinow.fun/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {}
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No valid CAIP-2 network identifier found in payment headers",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402, check not applicable)",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No 402 response body to check for bazaar compliance",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    }
+  ]
+}
