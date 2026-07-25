@@ -1,0 +1,35 @@
+{
+  "name": "terradeed_scrape",
+  "url": "https://api.terradeed.co.uk/scrape",
+  "method": "POST",
+  "status": 402,
+  "headers": {
+    "content-type": "application/json",
+    "payment-required": "eyJ4ND...9fQ=="
+  },
+  "body": "{\"error\":\"Payment required\",\"x402Version\":2,\"resource\":{\"url\":\"https://api.terradeed.co.uk/scrape\",\"description\":\"Scrape any public URL - clean LLM-ready markdown\",\"mimeType\":\"application/json\"},\"accepts\":[{\"scheme\":\"exact\",\"network\":\"eip155:8453\",\"asset\":\"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\"amount\":\"10000\",\"payTo\":\"0x4E024e356bd01853654b7B5196F2B85F67Cc39EC\",\"maxTimeoutSeconds\":300,\"extra\":{\"name\":\"USD Coin\",\"version\":\"2\"}}],\"extensions\":{\"bazaar\":{\"info\":{\"input\":{\"type\":\"http\",\"method\":\"POST\",\"bodyType\":\"json\",\"body\":{\"url\":\"https://example.com\",\"js_render\":false}},\"output\":{\"type\":\"json\",\"example\":{\"content\":\"## Example Domain\\n\\nThis domain is for use in illustrative examples.\",\"url\":\"https://example.com\",\"status\":\"success\",\"word_count\":28,\"title\":\"Example Domain\",\"js_rendered\":false,\"auth_method\":\"x402\"}}},\"schema\":{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"input\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\",\"const\":\"http\"},\"method\":{\"type\":\"string\",\"enum\":[\"POST\",\"PUT\",\"PATCH\"]},\"bodyType\":{\"type\":\"string\",\"enum\":[\"json\",\"form-data\",\"text\"]},\"body\":{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"string\",\"format\":\"uri\"},\"js_render\":{\"type\":\"boolean\",\"default\":false}},\"required\":[\"url\"]}}},\"required\":[\"type\",\"method\",\"bodyType\",\"body\"],\"additionalProperties\":false},\"output\":{\"type\":\"object\",\"properties\":{\"type\":{\"type\":\"string\"},\"example\":{\"type\":\"object\"}},\"required\":[\"type\"]}}},\"required\":[\"input\"]}}}}",
+  "request_body": {
+    "url": "https://example.com"
+  },
+  "captured_at_utc": "2026-07-25T21:31:04Z",
+  "expect_default": {
+    "passed": true,
+    "channel": "both"
+  },
+  "expect_strict_v2": {
+    "passed": true,
+    "channel": "both",
+    "legacy_placement": false
+  },
+  "provenance": {
+    "endpoint": "https://api.terradeed.co.uk/scrape",
+    "network": "base",
+    "asset": "USDC",
+    "amount_usd": 0.01,
+    "pay_to": "0x4E024e356bd01853654b7B5196F2B85F67Cc39EC",
+    "settlement_confirmed": true,
+    "last_settled_tx": "0x78df4c8f7768181aa80b0e4f37d7ed490ac786164a02d5c78ce1821554ba41ed",
+    "bazaar_indexed": true,
+    "catalogue_entries": 2
+  }
+}
