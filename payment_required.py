@@ -21,7 +21,11 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping
 
 
-CAIP2_RE = re.compile(r"^(eip155:\d+|solana:.+)$")
+# CAIP-2 (chainagnostic.org/CAIPs/caip-2): namespace 3-8 chars of [-a-z0-9],
+# reference 1-32 chars of [-_a-zA-Z0-9]. Real grammar, not an allowlist —
+# audit 2026-07-25 N2-5: the old (eip155|solana) pair rejected every other
+# valid namespace and passed judgement for the wrong reason.
+CAIP2_RE = re.compile(r"^[-a-z0-9]{3,8}:[-_a-zA-Z0-9]{1,32}$")
 
 
 @dataclass
@@ -185,7 +189,15 @@ def compare_channels(
 
 
 def _is_caip2(network: str) -> bool:
-    return bool(CAIP2_RE.match(network or ""))
+    s = network or ""
+    if not CAIP2_RE.match(s):
+        return False
+    ns, _, ref = s.partition(":")
+    if ns == "eip155":
+        # EIP-155 references are decimal chain ids; "eip155:mainnet" is not
+        # a valid CAIP-2 identifier even though the generic grammar allows it.
+        return ref.isdigit()
+    return True
 
 
 def validate_accepts(
@@ -213,6 +225,22 @@ def validate_accepts(
 
     accepts = obj.get("accepts")
     if not isinstance(accepts, list) or not accepts:
+        # Auth challenges (SIWX / login walls) reuse the 402 envelope with no
+        # payment offer (accepts: 0 / [] and an auth-flavoured error). That is
+        # out of payment-conformance scope, not a merchant defect
+        # (audit 2026-07-25 N3-1: 5 "failures" were routes the merchant
+        # publishes as free, gated by sign-in).
+        err_text = " ".join(
+            str(obj.get(k, "")) for k in ("error", "message", "detail")
+        ).lower()
+        if "auth" in err_text or "sign-in" in err_text or "login" in err_text:
+            return ValidateResult(
+                ok=True,
+                failure_class="auth_gated",
+                findings=[
+                    "auth challenge (no payment offer); payment conformance not applicable (info)"
+                ],
+            )
         return ValidateResult(
             ok=False,
             failure_class="v2_header_invalid" if source == "header" else "header_only_accepts",
@@ -236,12 +264,23 @@ def validate_accepts(
             version = 2 if source == "header" else 1
 
     header_like = source == "header" or version >= 2 or strict_v2
-    failure_class: str | None = None
 
-    for item in accepts:
+    # Per-rail validation (audit 2026-07-25 N2-1/N2-2): each accepts[] entry is
+    # judged on its own, findings carry the rail index, and the endpoint is
+    # conformant when AT LEAST ONE rail is fully valid — an agent can pay a
+    # compliant rail today regardless of what the neighbouring rail declares.
+    per_item_ok: list[bool] = []
+    first_fail_class: str | None = None
+
+    for i, item in enumerate(accepts):
+        prefix = f"accepts[{i}]: "
+        item_hard = False
+        item_class: str | None = None
+
         if not isinstance(item, dict):
-            findings.append("accepts[] entry is not an object")
-            failure_class = failure_class or "v2_header_invalid"
+            findings.append(prefix + "entry is not an object")
+            per_item_ok.append(False)
+            first_fail_class = first_fail_class or "v2_header_invalid"
             continue
 
         scheme = item.get("scheme")
@@ -252,50 +291,65 @@ def validate_accepts(
             networks.append(str(network))
 
         if scheme is None:
-            findings.append("accepts[] entry missing scheme")
-            failure_class = failure_class or "scheme_unsupported"
+            findings.append(prefix + "entry missing scheme")
+            item_hard, item_class = True, item_class or "scheme_unsupported"
         elif str(scheme) not in ("exact", "upto"):
             if strict_v2:
-                findings.append(f"unsupported scheme '{scheme}'")
-                failure_class = failure_class or "scheme_unsupported"
+                findings.append(prefix + f"unsupported scheme '{scheme}'")
+                item_hard, item_class = True, item_class or "scheme_unsupported"
             else:
                 # exact first-class; upto warning-level; unknown schemes are
                 # findings but do not hard-fail free tier (README / issue #3).
-                findings.append(f"unsupported scheme '{scheme}' (info)")
+                findings.append(prefix + f"unsupported scheme '{scheme}' (info)")
         if network is None:
-            findings.append("accepts[] entry missing network")
-            failure_class = failure_class or "network_format"
+            findings.append(prefix + "entry missing network")
+            item_hard, item_class = True, item_class or "network_format"
 
         if header_like or strict_v2:
             amount = item.get("amount")
+            net_str = str(network) if network is not None else ""
             if amount is None or str(amount).strip() == "":
-                findings.append("header/v2 accepts[] entry missing amount")
-                failure_class = failure_class or "amount_key"
+                findings.append(prefix + "header/v2 entry missing amount")
+                item_hard, item_class = True, item_class or "amount_key"
             elif not str(amount).isdigit():
-                findings.append("amount must be a digit string")
-                failure_class = failure_class or "amount_key"
+                if net_str.startswith(("eip155:", "solana:")):
+                    # x402 v2: amount is an atomic-unit digit string on the
+                    # networks whose convention the spec defines.
+                    findings.append(prefix + "amount must be an atomic-unit digit string")
+                    item_hard, item_class = True, item_class or "amount_key"
+                else:
+                    # Non-EVM/SVM rails (audit N2-1): we do not know the
+                    # network's unit convention, so we report, not convict.
+                    findings.append(
+                        prefix
+                        + "amount not in atomic digit form; unit convention unverified for this network (info)"
+                    )
 
-            if network is not None and not _is_caip2(str(network)):
-                findings.append("network must be CAIP-2 (eip155:<n> or solana:<id>)")
-                failure_class = failure_class or "network_format"
+            if network is not None and not _is_caip2(net_str):
+                findings.append(prefix + "network must be CAIP-2 (namespace:reference)")
+                item_hard, item_class = True, item_class or "network_format"
 
             if strict_v2:
                 asset = item.get("asset")
                 if asset is None or str(asset).strip() == "":
-                    findings.append("strict-v2 accepts[] entry missing asset")
-                    failure_class = failure_class or "v2_header_invalid"
+                    findings.append(prefix + "strict-v2 entry missing asset")
+                    item_hard, item_class = True, item_class or "v2_header_invalid"
                 pay_to = item.get("payTo")
                 if pay_to is None or str(pay_to).strip() == "":
-                    findings.append("strict-v2 accepts[] entry missing payTo")
-                    failure_class = failure_class or "v2_header_invalid"
+                    findings.append(prefix + "strict-v2 entry missing payTo")
+                    item_hard, item_class = True, item_class or "v2_header_invalid"
                 timeout = item.get("maxTimeoutSeconds")
                 if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or timeout <= 0:
-                    findings.append("strict-v2 requires maxTimeoutSeconds number > 0")
-                    failure_class = failure_class or "v2_header_invalid"
+                    findings.append(prefix + "strict-v2 requires maxTimeoutSeconds number > 0")
+                    item_hard, item_class = True, item_class or "v2_header_invalid"
         else:
             if _accept_price(item) is None:
-                findings.append("body accepts[] entry missing maxAmountRequired|amount|price")
-                failure_class = failure_class or "amount_key"
+                findings.append(prefix + "body entry missing maxAmountRequired|amount|price")
+                item_hard, item_class = True, item_class or "amount_key"
+
+        per_item_ok.append(not item_hard)
+        if item_hard:
+            first_fail_class = first_fail_class or item_class
 
     # de-dupe preserving order
     def _uniq(xs: list[str]) -> list[str]:
@@ -307,12 +361,10 @@ def validate_accepts(
                 out.append(x)
         return out
 
-    # Soft findings (unsupported scheme info) must not flip ok=False.
-    hard_findings = [f for f in findings if "(info)" not in f]
-    ok = failure_class is None and not hard_findings
+    ok = any(per_item_ok)
     return ValidateResult(
         ok=ok,
-        failure_class=failure_class,
+        failure_class=None if ok else first_fail_class,
         schemes=_uniq(schemes),
         networks=_uniq(networks),
         findings=findings,

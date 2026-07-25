@@ -148,12 +148,21 @@ def check_reachability(url: str) -> dict[str, Any]:
             allow_redirects=True,
         )
         elapsed_ms = int((time.monotonic() - started) * 1000)
-        passed = resp.status_code < 500 and resp.status_code != 0
+        # 404/410 mean the route does not exist — that is not "reachable"
+        # (audit 2026-07-25 N1-5: dead routes passed as "Non-5xx"). 401/403/429
+        # still count as alive: the route exists and answers.
+        status = resp.status_code
+        if status in (404, 410):
+            passed, note = False, f"Dead route (HTTP {status})"
+        elif status >= 500 or status == 0:
+            passed, note = False, "Server error"
+        else:
+            passed, note = True, "Route answered (non-error status)"
         return {
             "passed": passed,
-            "status_code": resp.status_code,
+            "status_code": status,
             "response_time_ms": elapsed_ms,
-            "note": "Non-5xx status received" if passed else "Server error",
+            "note": note,
         }
     except requests.RequestException as exc:
         return {
@@ -337,6 +346,9 @@ def check_402_body(
     chosen = None
     chosen_method: str | None = None
 
+    # Every attempt is recorded (audit 2026-07-25 N1-6: the earlier response
+    # used to vanish from the archive when a later method overwrote it).
+    attempts: list[tuple[str, Any]] = []
     for method in _probe_methods(probe_method):
         try:
             resp = _probe_once(url, method)
@@ -344,13 +356,24 @@ def check_402_body(
             last_exc = exc
             continue
         probed_at_utc = _utc_now()
+        attempts.append((method, resp))
         if resp.status_code == 402:
             chosen = resp
             chosen_method = method
             break
-        # Keep the last non-402 response in case nothing yields 402.
-        chosen = resp
-        chosen_method = method
+    if chosen is None and attempts:
+        # No 402 anywhere. Prefer a 2xx answer (route exists, likely free)
+        # over a method error, so a GET 200 is not buried under a POST 405
+        # (audit N2-7: "this route is free" never surfaced).
+        for method, resp in attempts:
+            if 200 <= resp.status_code < 300:
+                chosen, chosen_method = resp, method
+                break
+        else:
+            chosen_method, chosen = attempts[-1][0], attempts[-1][1]
+    attempts_meta = [
+        {"method": m, "status_code": r.status_code} for m, r in attempts
+    ]
 
     def _base_result(**extra: Any) -> dict[str, Any]:
         out = {
@@ -372,6 +395,7 @@ def check_402_body(
             "findings": [],
             "strict_v2": strict_v2,
             "probed_at_utc": probed_at_utc,
+            "probe_attempts": attempts_meta,
             "note": "",
         }
         out.update(extra)
@@ -553,6 +577,19 @@ def enhanced_check(url: str, api_key: str) -> dict[str, Any]:
         return {"ok": False, "error": str(e)}
 
 
+_MANIFEST_CACHE: dict[str, dict[str, Any]] = {}
+
+
+def _check_manifest_cached(url: str) -> dict[str, Any]:
+    """One manifest check per host per run (audit 2026-07-25 N3-2: the same
+    host manifest used to be fetched once per endpoint, so a single manifest
+    defect was counted N times and read as N broken endpoints)."""
+    host = url.split("//", 1)[-1].split("/", 1)[0]
+    if host not in _MANIFEST_CACHE:
+        _MANIFEST_CACHE[host] = check_manifest(url)
+    return _MANIFEST_CACHE[host]
+
+
 def validate_endpoint(
     url: str,
     threshold_ms: int,
@@ -562,12 +599,14 @@ def validate_endpoint(
 ) -> dict[str, Any]:
     log(f"validating {url}")
     reach = check_reachability(url)
-    manifest = check_manifest(url)
+    manifest = _check_manifest_cached(url)
     body = check_402_body(url, probe_method=probe_method, strict_v2=strict_v2)
     perf = check_p95(url, threshold_ms)
+    # A manifest defect is a HOST-level finding, reported via manifest_defect;
+    # it no longer fails every endpoint of the host (audit N3-2). The endpoint
+    # answers for its own behaviour only.
     endpoint_passed = all((
         reach["passed"],
-        manifest["passed"],
         body["passed"],
         perf["passed"],
         body.get("payment_required_passed", False),
@@ -575,6 +614,7 @@ def validate_endpoint(
     result = {
         "url": url,
         "passed": endpoint_passed,
+        "manifest_defect": not manifest["passed"],
         "probed_at_utc": body.get("probed_at_utc"),
         "checks": {
             "reachability": reach,
