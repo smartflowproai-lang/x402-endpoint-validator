@@ -2,11 +2,10 @@
 
 Audit, monitor, and protect endpoints against the **x402 strict-v2** standard.
 Includes a conformance engine (manifest discovery, CAIP-2, JSON resilience, Bazaar),
-CLI for batch audits, MCP server for agent/IDE integration, and a web dashboard.
+CLI for batch audits, and an MCP server for agent/IDE integration.
 
 ```bash
 pip install x402-validator
-# or: pip install "x402-validator[all]"  # dashboard + proxy extras
 ```
 
 ## Quick examples
@@ -26,11 +25,10 @@ x402-validate endpoints.txt --output html --parallel 20
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | x402-mcp
 ```
 
-**Dashboard** — view history and trends:
-```bash
-docker-compose up
-# Open http://localhost:5000
-```
+## Extended tools
+
+Dashboard, API server, Stripe monetization, and proxy middleware:
+[github.com/MSSATANASS/x402-validator-tools](https://github.com/MSSATANASS/x402-validator-tools)
 
 ## Documentation
 
