@@ -1,78 +1,41 @@
 # x402-validator
 
-Audita, monitorea y protege endpoints contra el estándar **x402 strict-v2**. Incluye un motor de chequeos (manifest discovery, CAIP-2, JSON resilience, Bazaar), CLI para auditorías masivas, servidor MCP para integración con agents/IDEs, dashboard web con históricos y proxy inverso que empaqueta validación en cada request.
+Audit, monitor, and protect endpoints against the **x402 strict-v2** standard.
+Includes a conformance engine (manifest discovery, CAIP-2, JSON resilience, Bazaar),
+CLI for batch audits, MCP server for agent/IDE integration, and a web dashboard.
 
 ```bash
 pip install x402-validator
-# o: pip install "x402-validator[all]"  # dashboard + proxy
+# or: pip install "x402-validator[all]"  # dashboard + proxy extras
 ```
 
-## 4 ejemplos de uso
+## Quick examples
 
-### CLI — auditar 100 endpoints desde un archivo
+**CLI** — validate a single endpoint:
+```bash
+x402-validate https://observer.137-184-67-179.sslip.io
+```
 
+**Batch audit** — validate many endpoints, output HTML report:
 ```bash
 x402-validate endpoints.txt --output html --parallel 20
 ```
 
-### MCP — conectar desde Claude / Cursor / cualquier cliente MCP
-
+**MCP server** — connect from Claude / Cursor / any MCP client:
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | x402-mcp
 ```
 
-### Dashboard — ver históricos y tendencias
-
+**Dashboard** — view history and trends:
 ```bash
-python main.py dashboard
-# Abrir http://localhost:5000
+docker-compose up
+# Open http://localhost:5000
 ```
 
-### Proxy — validar en cada request
+## Documentation
 
-```bash
-python main.py proxy
-curl http://localhost:8080/forward/https://api.example.com/data
-# Headers: X-Validation-Status, X-Validation-Report
-```
+Full documentation in the [`docs/`](docs/) directory.
 
-## Tests
+## Contributing
 
-```bash
-pip install -e ".[all]" pytest pytest-asyncio
-python -m pytest test_*.py -v
-```
-
----
-
-## Real-World Validation
-
-We validate the x402-validator against production endpoints:
-
-- **Observer Marketplace** (Base mainnet)
-  - 2 products, real USDC payments
-  - 7/10 checks pass
-  - See: [Validation Report](docs/VALIDATION_OBSERVER.md)
-
-This ensures the validator works against real,
-complex x402 implementations in production.
-
-## Contribuir
-
-Ver [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Roadmap
-
-- [x] CLI con salida csv/json/html
-- [x] MCP server (JSON-RPC 2.0 sobre stdio)
-- [x] Dashboard web con históricos
-- [x] Proxy middleware validante
-- [x] Docker compose + CI
-- [ ] Publicación en PyPI
-- [ ] Plugin para GitHub Actions
-- [ ] Modo watch / daemon
-- [ ] Webhooks (Slack, email)
-
----
-
-Parte del ecosistema [x402-endpoint-validator](https://github.com/smartflowproai-lang/x402-endpoint-validator).
+See [CONTRIBUTING.md](CONTRIBUTING.md).

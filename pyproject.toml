@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "x402-validator"
+version = "0.2.0"
+description = "x402 endpoint validator: CLI, MCP, Dashboard, Proxy"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = ["x402", "validator", "blockchain", "payment"]
+authors = [
+    {name = "Gael L Chulim", email = "mssali-ai@github.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp>=3.9",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dashboard = ["flask>=3.0", "jinja2>=3.1"]
+proxy = ["pyyaml>=6.0"]
+all = ["flask>=3.0", "jinja2>=3.1", "pyyaml>=6.0"]
+
+[project.urls]
+homepage = "https://github.com/smartflowproai-lang/x402-endpoint-validator"
+repository = "https://github.com/smartflowproai-lang/x402-endpoint-validator"
+
+[project.scripts]
+x402-validate = "x402_validator.cli:main"
+x402-mcp = "x402_validator.mcp_server:main"
+
+[tool.setuptools.packages.find]
+include = ["x402_validator*", "dashboard*"]
+
+[tool.setuptools]
+include-package-data = true
+package-data = {"x402_validator" = ["py.typed"], "dashboard" = ["templates/*.html"]}
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+asyncio_mode = "strict"
