@@ -7,20 +7,30 @@ status 0 (all checks meet thresholds) or 1 (one or more failed).
 
 Checks per endpoint
 -------------------
-1. HTTP reachability — GET returns a non-5xx status; expectation is 200 for
-   resource roots and 402 for paywalled paths. The check records the status
-   and treats network errors / 5xx as failures.
-2. /.well-known/x402 manifest — fetched at the origin, must parse as JSON
+1. HTTP reachability — decided from the probe attempts in check 3: the route
+   is alive when any method got a non-5xx, non-404/410 answer. A 402 from
+   POST proves a POST-only route exists, so a GET 404 on it is not a dead
+   route. Network errors / 5xx / all-methods-404 are failures.
+2. /.well-known/x402 manifest — fetched once per host, must parse as JSON
    and contain either an `accepts[]` (per resource) or a `resources[]` /
-   `payment` block compatible with x402 spec v1 or v2.
+   `payment` block compatible with x402 spec v1 or v2. A defect here is a
+   HOST-level finding surfaced in `summary.manifest_defect_hosts`; it does
+   not fail the endpoint.
 3. PaymentRequired conformance — probes GET then POST (configurable) with
    no payment headers; on HTTP 402, prefers the v2 PAYMENT-REQUIRED header
    (base64 PaymentRequired) as canonical, falls back to body accepts[] as
    legacy placement, and reports channel / mismatch / failure_class.
 4. Response time P95 — five sequential probes; the 95th percentile of the
    latency samples (ms) must be below `threshold_p95_ms`.
-5. Payment-required behavior — confirms that the unauthenticated POST in
-   check 3 returned HTTP 402 (not 401/403/200/empty body).
+5. Payment-required behavior — confirms that the unauthenticated probe in
+   check 3 returned HTTP 402 (not 401/403/200/empty body), unless the route
+   is declared `expect: free`.
+
+Severity
+--------
+Each endpoint carries `pass`, `info`, or `fail`. `info` (`free_route`,
+`auth_gated`, `unknown_network`) means there is nothing to convict: it never
+counts as a failure and never launders into a pass.
 
 Spec reference: the response-body shape mirrored here is the
 `x402Version=1` shape observed across the dominant cohort of live x402
@@ -40,6 +50,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import statistics
 import sys
 import time
@@ -54,6 +65,10 @@ except ImportError:  # pragma: no cover - yaml is in image but stay defensive
     yaml = None  # type: ignore
 
 from payment_required import (
+    INFO_CLASSES,
+    SEVERITY_FAIL,
+    SEVERITY_INFO,
+    SEVERITY_PASS,
     caip2_in_obj,
     classify_failure,
     compare_channels,
@@ -61,7 +76,8 @@ from payment_required import (
     validate_accepts,
 )
 
-USER_AGENT = "x402-endpoint-validator/1.0 (+https://smartflowproai.com/atlas)"
+VALIDATOR_VERSION = "1.3.0"
+USER_AGENT = f"x402-endpoint-validator/{VALIDATOR_VERSION} (+https://smartflowproai.com/atlas)"
 DEFAULT_TIMEOUT_S = 10
 P95_SAMPLE_COUNT = 5
 REQUIRED_402_KEYS = ("x402Version", "accepts", "error")
@@ -71,8 +87,16 @@ PRICE_KEYS = ("maxAmountRequired", "amount", "price")
 # Archive limits for raw_response (strict-v2 design contract).
 # Cap keeps corpus reports bounded when a single endpoint returns a huge body.
 RAW_RESPONSE_BODY_MAX_BYTES = 64 * 1024  # 64 KiB
-# Headers that must never land in CI artifacts / corpus reports.
-REDACTED_RESPONSE_HEADERS = frozenset({"set-cookie", "authorization"})
+# Headers that must never land in CI artifacts / corpus reports. Beyond the
+# obvious secrets: CDN telemetry headers carry per-zone reporting tokens and
+# nothing about x402 conformance (audit 2026-07-25, redaction list, LOW).
+REDACTED_RESPONSE_HEADERS = frozenset({
+    "set-cookie",
+    "authorization",
+    "nel",
+    "report-to",
+    "reporting-endpoints",
+})
 REDACTED_HEADER_PLACEHOLDER = "[REDACTED]"
 
 
@@ -80,25 +104,83 @@ def log(msg: str) -> None:
     print(f"[x402-validator] {msg}", flush=True)
 
 
-def parse_endpoints(raw: str, workspace: str) -> list[str]:
-    """Resolve the `endpoints` input into a list of URLs.
+# Outbound request throttle. A full run is up to 7 requests per endpoint
+# (probe + 5 latency samples + one manifest fetch per host); on a 75-endpoint
+# corpus that is a load spike on someone else's production API. Set
+# X402V_MAX_RPS=0 to disable.
+_last_request_at: float = 0.0
 
-    Accepts: a single URL string, a JSON array literal, or a path to a
-    YAML/JSON file inside the workspace whose top-level value is either a
-    list or an object with an `endpoints` key.
+
+def _throttle() -> None:
+    global _last_request_at
+    try:
+        max_rps = float(os.environ.get("X402V_MAX_RPS", "0") or "0")
+    except ValueError:
+        max_rps = 0.0
+    if max_rps <= 0:
+        return
+    min_gap = 1.0 / max_rps
+    wait = min_gap - (time.monotonic() - _last_request_at)
+    if wait > 0:
+        time.sleep(wait)
+    _last_request_at = time.monotonic()
+
+
+# Characters that never appear in a bare endpoint URL but do appear when a
+# sentence from a provider's docs is mistaken for one (audit 2026-07-25 RS-12:
+# `https://…/v1/llm {"prompt":"..."} — $0.002, or GET /v1/weather…` was scanned
+# as an endpoint and became the only finding in a partner-facing report).
+_URL_FORBIDDEN_CHARS = frozenset(' \t\n\r\v\f"\'{}<>|\\^`')
+_HOST_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
+
+def validate_endpoint_url(url: str) -> str | None:
+    """Return None when `url` is a usable endpoint URL, else the reason why not."""
+    if not url:
+        return "empty entry"
+    if any(ch in _URL_FORBIDDEN_CHARS for ch in url):
+        return "contains whitespace or prose punctuation (looks like documentation text, not a URL)"
+    if any(ord(ch) > 127 for ch in url):
+        return "contains non-ASCII characters (looks like documentation text, not a URL)"
+    if not url.startswith(("http://", "https://")):
+        return "not an http(s) URL"
+    parts = urlsplit(url)
+    if not parts.netloc:
+        return "missing host"
+    host = parts.netloc.rsplit("@", 1)[-1].rsplit(":", 1)[0]
+    if not host or not _HOST_RE.match(host):
+        return "invalid host"
+    if "." not in host and host != "localhost":
+        return "implausible host (no dot, not localhost)"
+    return None
+
+
+def parse_endpoints(raw: str, workspace: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """Resolve the `endpoints` input into (specs, rejected).
+
+    Accepts: a single URL string, a newline-separated URL list, a JSON array
+    literal, or a path to a YAML/JSON file inside the workspace whose
+    top-level value is either a list or an object with an `endpoints` key.
+
+    Each spec is ``{"url", "probe_method", "expect"}``. List entries may be
+    plain URL strings or objects carrying per-endpoint ``probe_method``
+    (auto|GET|POST) and ``expect`` (auto|paid|free).
+
+    Entries that do not look like URLs are *rejected*, not scanned — they are
+    returned as ``{"entry", "reason"}`` so the run can report them instead of
+    accusing a merchant of a route it never published (RS-12).
     """
     raw = (raw or "").strip()
     if not raw:
         raise ValueError("endpoints input is empty")
 
     if raw.startswith("http://") or raw.startswith("https://"):
-        # Could still be space- or newline-separated multi-URL.
-        parts = [p.strip() for p in raw.split() if p.strip()]
-        return parts
+        # One URL per line. Splitting on arbitrary whitespace is what turned a
+        # documentation sentence into three "endpoints" (RS-12).
+        return _coerce_list([line.strip() for line in raw.splitlines() if line.strip()])
 
     if raw.startswith("[") or raw.startswith("{"):
-        data = json.loads(raw)
-        return _coerce_list(data)
+        return _coerce_list(json.loads(raw))
 
     candidate = os.path.join(workspace, raw)
     if os.path.isfile(candidate):
@@ -115,22 +197,33 @@ def parse_endpoints(raw: str, workspace: str) -> list[str]:
     raise ValueError(f"could not interpret endpoints input: {raw!r}")
 
 
-def _coerce_list(data: Any) -> list[str]:
+def _coerce_list(data: Any) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     if isinstance(data, list):
-        urls = data
+        entries = data
     elif isinstance(data, dict) and "endpoints" in data:
-        urls = data["endpoints"]
+        entries = data["endpoints"]
     else:
         raise ValueError("endpoints config must be a list or {endpoints: [...]}")
-    out: list[str] = []
-    for item in urls:
+
+    specs: list[dict[str, Any]] = []
+    rejected: list[dict[str, str]] = []
+    for item in entries:
         if isinstance(item, str):
-            out.append(item.strip())
+            url, probe_method, expect = item.strip(), "auto", "auto"
         elif isinstance(item, dict) and "url" in item:
-            out.append(str(item["url"]).strip())
+            url = str(item["url"]).strip()
+            probe_method = str(item.get("probe_method") or "auto").strip() or "auto"
+            expect = str(item.get("expect") or "auto").strip().lower() or "auto"
         else:
             raise ValueError(f"unrecognised endpoint entry: {item!r}")
-    return [u for u in out if u]
+        if expect not in ("auto", "paid", "free"):
+            raise ValueError(f"expect must be auto|paid|free, got {expect!r}")
+        reason = validate_endpoint_url(url)
+        if reason:
+            rejected.append({"entry": url, "reason": reason})
+            continue
+        specs.append({"url": url, "probe_method": probe_method, "expect": expect})
+    return specs, rejected
 
 
 def origin_of(url: str) -> str:
@@ -138,43 +231,72 @@ def origin_of(url: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, "", "", ""))
 
 
-def check_reachability(url: str) -> dict[str, Any]:
-    started = time.monotonic()
-    try:
-        resp = requests.get(
-            url,
-            timeout=DEFAULT_TIMEOUT_S,
-            headers={"User-Agent": USER_AGENT, "Accept": "application/json"},
-            allow_redirects=True,
-        )
-        elapsed_ms = int((time.monotonic() - started) * 1000)
-        # 404/410 mean the route does not exist — that is not "reachable"
-        # (audit 2026-07-25 N1-5: dead routes passed as "Non-5xx"). 401/403/429
-        # still count as alive: the route exists and answers.
-        status = resp.status_code
-        if status in (404, 410):
-            passed, note = False, f"Dead route (HTTP {status})"
-        elif status >= 500 or status == 0:
-            passed, note = False, "Server error"
-        else:
-            passed, note = True, "Route answered (non-error status)"
-        return {
-            "passed": passed,
-            "status_code": status,
-            "response_time_ms": elapsed_ms,
-            "note": note,
-        }
-    except requests.RequestException as exc:
+def check_reachability(url: str, probe_attempts: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """Decide liveness from the probe attempts that produced the verdict.
+
+    A route is alive when *any* method got a non-5xx, non-404/410 answer out
+    of it. Judging liveness with a standalone GET convicted POST-only routes
+    as "Dead route (HTTP 404)" in the same record where the POST probe
+    reported `402 with strict-v2 conformant PaymentRequired` — the report
+    contradicted itself (audit 2026-07-25 RS-2). 401/403/429 still count as
+    alive: the route exists and answers.
+    """
+    attempts = list(probe_attempts or [])
+    if not attempts:
+        # No probe evidence (probe itself failed at the network layer).
         return {
             "passed": False,
             "status_code": None,
-            "response_time_ms": None,
-            "note": f"network error: {exc.__class__.__name__}",
+            "method": None,
+            "attempts": [],
+            "note": "no probe response (network error)",
         }
+
+    def _alive(status: Any) -> bool:
+        return isinstance(status, int) and 0 < status < 500 and status not in (404, 410)
+
+    # A 402 is the strongest liveness evidence there is: the route exists and
+    # is paywalled. Prefer it over any other answer, whichever method got it.
+    deciding = next((a for a in attempts if a.get("status_code") == 402), None)
+    if deciding is None:
+        deciding = next((a for a in attempts if _alive(a.get("status_code"))), None)
+
+    tried = ", ".join(
+        f"{a.get('method')} {a.get('status_code')}" for a in attempts
+    )
+    if deciding is not None:
+        status = deciding["status_code"]
+        method = deciding.get("method")
+        note = (
+            f"Route alive: HTTP 402 via {method}"
+            if status == 402
+            else f"Route answered (HTTP {status} via {method})"
+        )
+        return {
+            "passed": True,
+            "status_code": status,
+            "method": method,
+            "attempts": attempts,
+            "note": note,
+        }
+
+    statuses = [a.get("status_code") for a in attempts]
+    if any(isinstance(s, int) and s >= 500 for s in statuses):
+        note = f"Server error (tried: {tried})"
+    else:
+        note = f"Dead route — no method answered (tried: {tried})"
+    return {
+        "passed": False,
+        "status_code": statuses[-1],
+        "method": attempts[-1].get("method"),
+        "attempts": attempts,
+        "note": note,
+    }
 
 
 def check_manifest(url: str) -> dict[str, Any]:
     manifest_url = origin_of(url) + "/.well-known/x402"
+    _throttle()
     try:
         resp = requests.get(
             manifest_url,
@@ -269,6 +391,7 @@ def _probe_once(url: str, method: str) -> Any:
         "User-Agent": USER_AGENT,
         "Accept": "application/json",
     }
+    _throttle()
     if method == "POST":
         headers["Content-Type"] = "application/json"
         return requests.post(url, timeout=DEFAULT_TIMEOUT_S, headers=headers, json={})
@@ -334,6 +457,7 @@ def check_402_body(
     url: str,
     probe_method: str = "auto",
     strict_v2: bool = False,
+    expect: str = "auto",
 ) -> dict[str, Any]:
     """Probe for HTTP 402 and validate PaymentRequired (header-canonical v2).
 
@@ -394,6 +518,8 @@ def check_402_body(
             "x402_version": None,
             "findings": [],
             "strict_v2": strict_v2,
+            "expect": expect,
+            "severity": SEVERITY_FAIL,
             "probed_at_utc": probed_at_utc,
             "probe_attempts": attempts_meta,
             "note": "",
@@ -429,7 +555,17 @@ def check_402_body(
     body_ok = False
     note = ""
 
-    if not is_402:
+    severity = SEVERITY_FAIL
+
+    if not is_402 and expect == "free":
+        # The provider documents this route as free (e.g. its own OpenAPI
+        # declares responses: ["200"]). Absence of a 402 is the documented
+        # behaviour, not a spec violation — reporting it as a failure accuses
+        # the merchant of breaking a contract it never made (audit RS-3).
+        failure_class = "free_route"
+        severity = SEVERITY_INFO
+        note = f"documented free route answered HTTP {status}; no payment required (info)"
+    elif not is_402:
         failure_class = "undecided"
         note = f"expected HTTP 402, got {status}"
     elif extracted.header_invalid:
@@ -463,6 +599,11 @@ def check_402_body(
         networks = validated.networks
         findings = list(validated.findings)
         failure_class = None if validated.ok else validated.failure_class
+        severity = validated.severity
+        if expect == "free":
+            findings.append(
+                "route is documented as free but returned 402 (documentation drift)"
+            )
         if channel_mismatch:
             findings.append(
                 "header/body channel mismatch on: " + ", ".join(mismatch_fields)
@@ -479,6 +620,8 @@ def check_402_body(
             note = "; ".join(findings) if findings else "non-conformant PaymentRequired"
 
     passed = bool(is_402 and body_ok)
+    if passed:
+        severity = SEVERITY_PASS
     x402_version = None
     if extracted.canonical is not None:
         x402_version = extracted.canonical.get("x402Version")
@@ -505,7 +648,13 @@ def check_402_body(
         "x402_version": x402_version,
         "findings": findings,
         "strict_v2": strict_v2,
+        "expect": expect,
+        "severity": severity,
         "probed_at_utc": probed_at_utc,
+        # Advertised evidence field that never reached the report: it was
+        # built for _base_result() only, so 0 of 81 endpoint records in the
+        # 2026-07-25 re-scans carried it (audit RS-10).
+        "probe_attempts": attempts_meta,
         "raw_response": raw_response,
         "note": note,
     }
@@ -515,6 +664,7 @@ def check_p95(url: str, threshold_ms: int) -> dict[str, Any]:
     samples: list[int] = []
     errors = 0
     for _ in range(P95_SAMPLE_COUNT):
+        _throttle()
         started = time.monotonic()
         try:
             resp = requests.get(
@@ -596,24 +746,35 @@ def validate_endpoint(
     api_key: str = "",
     probe_method: str = "auto",
     strict_v2: bool = False,
+    expect: str = "auto",
 ) -> dict[str, Any]:
     log(f"validating {url}")
-    reach = check_reachability(url)
+    # The payment probe runs first so reachability can be decided from the
+    # method that actually produced the verdict (RS-2).
+    body = check_402_body(
+        url, probe_method=probe_method, strict_v2=strict_v2, expect=expect
+    )
+    reach = check_reachability(url, body.get("probe_attempts"))
     manifest = _check_manifest_cached(url)
-    body = check_402_body(url, probe_method=probe_method, strict_v2=strict_v2)
     perf = check_p95(url, threshold_ms)
+    # Severity, not a bare boolean: `info` means "nothing to convict here"
+    # (documented free route, auth wall, unverifiable network), so it must not
+    # count as a failure — and must not be laundered into a pass either.
+    severity = body.get("severity") or (SEVERITY_PASS if body.get("passed") else SEVERITY_FAIL)
     # A manifest defect is a HOST-level finding, reported via manifest_defect;
     # it no longer fails every endpoint of the host (audit N3-2). The endpoint
     # answers for its own behaviour only.
     endpoint_passed = all((
         reach["passed"],
-        body["passed"],
         perf["passed"],
-        body.get("payment_required_passed", False),
+        severity in (SEVERITY_PASS, SEVERITY_INFO),
     ))
     result = {
         "url": url,
         "passed": endpoint_passed,
+        "severity": severity,
+        "failure_class": body.get("failure_class"),
+        "expect": expect,
         "manifest_defect": not manifest["passed"],
         "probed_at_utc": body.get("probed_at_utc"),
         "checks": {
@@ -644,7 +805,16 @@ def validate_endpoint(
 
 
 def print_upsell(api_key_present: bool) -> None:
-    """Lead-funnel CTA appended to every Action run."""
+    """Lead-funnel CTA. Opt-in via X402V_SHOW_UPSELL=true.
+
+    Off by default: scan logs get pasted into partner-facing bug reports, and
+    a sales pitch stapled to an accusation is not a defensible artifact
+    (audit 2026-07-25, redaction list).
+    """
+    if (os.environ.get("X402V_SHOW_UPSELL", "") or "").strip().lower() not in (
+        "1", "true", "yes", "on"
+    ):
+        return
     if api_key_present:
         return  # paid user, no need to upsell
     log("")
@@ -675,15 +845,27 @@ def maybe_post_webhook(webhook_url: str, report: dict[str, Any]) -> None:
 
 
 def decide_exit_code(report: dict[str, Any], fail_on: str) -> int:
+    """Map the report to an exit code. Every mode is a subset of `passed`.
+
+    `critical` used to also fail on a manifest defect, which `passed` says is
+    not the endpoint's failure — two contradictory definitions of failure in
+    one binary (audit 2026-07-25 RS-7). Manifest drift now has its own opt-in
+    mode so the behaviour is requested, not smuggled in.
+    """
+    summary = report["summary"]
     if fail_on == "never":
         return 0
-    summary = report["summary"]
+    if fail_on == "manifest":
+        return 1 if summary.get("manifest_defect_hosts") else 0
     if fail_on == "critical":
-        critical = 0
-        for ep in report["endpoints"]:
-            checks = ep["checks"]
-            if not checks["manifest"]["passed"] or not checks["body_conformance"]["passed"]:
-                critical += 1
+        # Payment-conformance defects only, and only ones that already made
+        # the endpoint fail. Info classes never reach here.
+        critical = sum(
+            1
+            for ep in report["endpoints"]
+            if not ep["passed"]
+            and ep["checks"]["body_conformance"].get("severity") == SEVERITY_FAIL
+        )
         return 1 if critical else 0
     # default: "any"
     return 0 if summary["all_passed"] else 1
@@ -713,39 +895,58 @@ def main() -> int:
         webhook_url = ""
 
     try:
-        urls = parse_endpoints(endpoints_raw, workspace)
+        specs, rejected = parse_endpoints(endpoints_raw, workspace)
     except (ValueError, RuntimeError, json.JSONDecodeError) as exc:
         log(f"failed to parse endpoints: {exc}")
         return 2
-    if not urls:
+    for bad in rejected:
+        log(f"rejected input entry (not a URL): {bad['reason']}")
+    if not specs:
         log("no endpoints to validate")
         return 2
 
-    log(
-        f"tier={tier}, threshold_p95_ms={threshold_ms}, endpoints={len(urls)}, "
-        f"probe_method={probe_method}, strict_v2={strict_v2}, enhanced={'on' if api_key else 'off'}"
-    )
+    log(f"validating {len(specs)} endpoint(s)")
 
     results = [
         validate_endpoint(
-            u,
+            spec["url"],
             threshold_ms,
             api_key,
-            probe_method=probe_method,
+            probe_method=spec.get("probe_method") or probe_method,
             strict_v2=strict_v2,
+            expect=spec.get("expect", "auto"),
         )
-        for u in urls
+        for spec in specs
     ]
     failures = sum(1 for r in results if not r["passed"])
+    info_only = sum(1 for r in results if r["passed"] and r.get("severity") == SEVERITY_INFO)
+    # Host-level, not per-endpoint: one broken manifest used to be counted once
+    # per endpoint of the host (audit N3-2) and then vanished from the summary
+    # entirely (RS-6). It is a real finding — it belongs in the headline.
+    defect_hosts = sorted({
+        r["checks"]["manifest"]["manifest_url"]
+        for r in results
+        if r.get("manifest_defect")
+    })
+    info_classes = sorted({
+        r.get("failure_class")
+        for r in results
+        if r.get("failure_class") in INFO_CLASSES
+    })
     summary = {
         "endpoints_checked": len(results),
         "failures": failures,
         "all_passed": failures == 0,
+        "info_findings": info_only,
+        "info_classes": info_classes,
+        "manifest_defect_hosts": defect_hosts,
+        "manifest_defects": len(defect_hosts),
+        "input_entries_rejected": rejected,
         "threshold_p95_ms": threshold_ms,
         "tier": tier,
         "enhanced_enabled": bool(api_key),
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "validator_version": "1.2.0",
+        "validator_version": VALIDATOR_VERSION,
         "probe_method": probe_method,
         "strict_v2": strict_v2,
     }
@@ -756,7 +957,14 @@ def main() -> int:
     os.makedirs(os.path.dirname(abs_report) or ".", exist_ok=True)
     with open(abs_report, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, sort_keys=False)
-    log(f"wrote report to {abs_report}")
+    # Basename only: the full path leaks the runner's filesystem layout into
+    # every log that gets pasted into a partner-facing report.
+    log(f"wrote report to {os.path.basename(abs_report)}")
+    if defect_hosts:
+        log(f"manifest defects: {len(defect_hosts)} host(s) — {', '.join(defect_hosts)}")
+    if info_only:
+        log(f"informational (not failures): {info_only} endpoint(s) — {', '.join(info_classes)}")
+    log(f"result: {len(results) - failures} passed, {failures} failed")
 
     if tier == "pro":
         maybe_post_webhook(webhook_url, report)
