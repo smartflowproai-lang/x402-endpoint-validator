@@ -406,3 +406,95 @@ def caip2_in_obj(obj: dict[str, Any] | None) -> bool:
         if isinstance(item, dict) and _is_caip2(str(item.get("network", ""))):
             return True
     return False
+
+
+@dataclass
+class BazaarResult:
+    ok: bool
+    present: bool
+    failure_class: str | None
+    findings: list[str] = field(default_factory=list)
+
+
+def check_bazaar_extension(obj: dict[str, Any] | None) -> BazaarResult:
+    """Validate the ``extensions.bazaar`` block against the shape observed in
+    production captures (viridis_regulatory_radar, viridis_ghg_ledger,
+    asterpay_crypto_prices, asterpay_sentiment — all four agree byte-for-byte
+    on the top-level keys below).
+
+    The block is an OPTIONAL marketplace-discovery extension, not part of the
+    core x402 PaymentRequired contract, so its absence is conformant (PASS,
+    ``present=False``). When present, the observed shape is::
+
+        extensions.bazaar.info.input.type    == "http"
+        extensions.bazaar.info.input.method  (str, e.g. "GET"/"POST")
+        extensions.bazaar.info.output.type   (str, e.g. "json")
+        extensions.bazaar.schema             (JSON Schema dict, optional but
+                                               always present in every capture
+                                               collected so far)
+
+    Returns FAIL when the block exists but is missing ``info``, or ``info``
+    is missing ``input``/``output``, or those sub-objects are not dicts, or a
+    present ``schema`` is not itself an object. These are the failure modes
+    that would break a marketplace client parsing this block, not a strict
+    reading of fields no capture has ever required (no ``serviceName`` /
+    ``tags`` field exists in any of the four production captures; an earlier
+    draft of this check assumed a shape that does not match any real
+    merchant and would have failed 4/4 conformant Bazaar merchants).
+    """
+    if not isinstance(obj, dict):
+        return BazaarResult(ok=True, present=False, failure_class=None)
+
+    extensions = obj.get("extensions")
+    if not isinstance(extensions, dict) or "bazaar" not in extensions:
+        return BazaarResult(ok=True, present=False, failure_class=None)
+
+    bazaar = extensions.get("bazaar")
+    findings: list[str] = []
+
+    if not isinstance(bazaar, dict):
+        return BazaarResult(
+            ok=False,
+            present=True,
+            failure_class="bazaar_malformed",
+            findings=["extensions.bazaar is present but not an object"],
+        )
+
+    info = bazaar.get("info")
+    if not isinstance(info, dict):
+        return BazaarResult(
+            ok=False,
+            present=True,
+            failure_class="bazaar_malformed",
+            findings=["extensions.bazaar.info missing or not an object"],
+        )
+
+    input_block = info.get("input")
+    if not isinstance(input_block, dict):
+        findings.append("extensions.bazaar.info.input missing or not an object")
+    else:
+        if not input_block.get("type"):
+            findings.append("extensions.bazaar.info.input.type missing")
+        if not input_block.get("method"):
+            findings.append("extensions.bazaar.info.input.method missing")
+
+    output_block = info.get("output")
+    if not isinstance(output_block, dict):
+        findings.append("extensions.bazaar.info.output missing or not an object")
+    else:
+        if not output_block.get("type"):
+            findings.append("extensions.bazaar.info.output.type missing")
+
+    schema = bazaar.get("schema")
+    if schema is not None and not isinstance(schema, dict):
+        findings.append("extensions.bazaar.schema present but not an object")
+
+    if findings:
+        return BazaarResult(
+            ok=False,
+            present=True,
+            failure_class="bazaar_malformed",
+            findings=findings,
+        )
+
+    return BazaarResult(ok=True, present=True, failure_class=None)
