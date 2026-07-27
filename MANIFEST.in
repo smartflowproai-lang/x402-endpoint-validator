@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+include MANIFEST.in
+include CHANGELOG.md
+include requirements.txt
+recursive-include tests/fixtures *.json
+recursive-include docs *.md

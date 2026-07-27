@@ -1,3 +1,15 @@
+"""x402 Mass Audit CLI — validate endpoints against x402 strict-v2.
+
+Usage:
+    x402-validate ENDPOINTS_FILE [--output csv|json|html] [--parallel N]
+                                   [--timeout SECONDS] [--mode standard|marketplace]
+
+Reads one URL per line from ``ENDPOINTS_FILE``. Lines starting with ``#`` are
+ignored. Comments after ``  # `` inline are also stripped.
+"""
+
+from __future__ import annotations
+
 import argparse
 import asyncio
 import csv
@@ -5,13 +17,20 @@ import json
 import os
 import sys
 import time
+from collections import Counter
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Sequence
 
-from x402_validator.conformance import run_audit, AuditReport
+from x402_validator._engine import X402Auditor, AuditReport, run_audit
+
+
+# ---------------------------------------------------------------------------
+# Input parsing
+# ---------------------------------------------------------------------------
 
 
 def read_urls_from_file(path: str) -> list[str]:
+    """Read a URL list file (one URL per line, ``#`` comments, ``  # `` inline)."""
     urls: list[str] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
@@ -25,7 +44,13 @@ def read_urls_from_file(path: str) -> list[str]:
     return urls
 
 
+# ---------------------------------------------------------------------------
+# Report writers (csv / json / html)
+# ---------------------------------------------------------------------------
+
+
 def report_to_row(report: AuditReport) -> dict[str, str]:
+    """Flatten a single report to a CSV-friendly row."""
     checks = {c.check_name: c.status for c in report.checks}
     row: dict[str, str] = {
         "url": report.target_url,
@@ -38,15 +63,11 @@ def report_to_row(report: AuditReport) -> dict[str, str]:
     }
     if "marketplace_products" in checks:
         row["marketplace_products"] = checks["marketplace_products"]
-    product_i = 1
-    for c in report.checks:
-        if c.check_name == "product_check":
-            row.setdefault("product_checks", "")
-            row["product_checks"] += f"{c.status} " if len(row.get("product_checks", "")) < 50 else ""
     return row
 
 
 def write_csv(results: list[AuditReport], path: str) -> None:
+    """Write results to a CSV file with one row per endpoint."""
     rows = [report_to_row(r) for r in results]
     if not rows:
         return
@@ -58,7 +79,7 @@ def write_csv(results: list[AuditReport], path: str) -> None:
 
 
 def write_json(results: list[AuditReport], path: str) -> None:
-    from collections import Counter
+    """Write results to a JSON file with summary + per-endpoint detail."""
     gap_counter: Counter = Counter()
     for r in results:
         for c in r.checks:
@@ -70,9 +91,13 @@ def write_json(results: list[AuditReport], path: str) -> None:
         "summary": {
             "pass": sum(1 for r in results if r.overall_status == "PASS"),
             "warn": sum(1 for r in results if r.overall_status == "WARN"),
-            "fail": sum(1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL")),
+            "fail": sum(
+                1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL")
+            ),
             "error": sum(1 for r in results if r.overall_status == "ERROR"),
-            "common_gaps": [{"check": n, "count": c} for n, c in gap_counter.most_common(10)],
+            "common_gaps": [
+                {"check": n, "count": c} for n, c in gap_counter.most_common(10)
+            ],
         },
         "results": [r.model_dump(mode="json") for r in results],
     }
@@ -80,25 +105,7 @@ def write_json(results: list[AuditReport], path: str) -> None:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def write_html(results: list[AuditReport], path: str) -> None:
-    rows_html = ""
-    for r in results:
-        checks_str = ", ".join(f"{c.check_name}: {c.status}" for c in r.checks)
-        status_class = r.overall_status.lower()
-        rows_html += (
-            f'<tr class="{status_class}">'
-            f"<td>{r.target_url}</td>"
-            f'<td><span class="badge {status_class}">{r.overall_status}</span></td>'
-            f"<td>{checks_str}</td>"
-            f"<td>{r.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</td>"
-            f"</tr>\n"
-        )
-
-    passed = sum(1 for r in results if r.overall_status == "PASS")
-    failed = sum(1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL"))
-    errors = sum(1 for r in results if r.overall_status == "ERROR")
-
-    html = f"""<!DOCTYPE html>
+_HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -135,7 +142,7 @@ tr.error td:first-child {{ border-left: 3px solid #d29922; }}
 <div class="summary-card pass"><div class="count">{passed}</div><div>Passed</div></div>
 <div class="summary-card fail"><div class="count">{failed}</div><div>Failed</div></div>
 <div class="summary-card error"><div class="count">{errors}</div><div>Errors</div></div>
-<div class="summary-card"><div class="count">{len(results)}</div><div>Total</div></div>
+<div class="summary-card"><div class="count">{total}</div><div>Total</div></div>
 </div>
 <table>
 <thead><tr><th>URL</th><th>Status</th><th>Checks</th><th>Timestamp</th></tr></thead>
@@ -143,16 +150,57 @@ tr.error td:first-child {{ border-left: 3px solid #d29922; }}
 {rows_html}
 </tbody>
 </table>
-<div class="footer">Generated at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')} | x402 Validator v0.2.0</div>
+<div class="footer">Generated at {generated_at} | x402 Validator</div>
 </body>
-</html>"""
+</html>
+"""
+
+
+def write_html(results: list[AuditReport], path: str) -> None:
+    """Write a self-contained HTML report with summary cards and a status table."""
+    rows_html = ""
+    for r in results:
+        checks_str = ", ".join(f"{c.check_name}: {c.status}" for c in r.checks)
+        status_class = r.overall_status.lower()
+        rows_html += (
+            f'<tr class="{status_class}">'
+            f"<td>{r.target_url}</td>"
+            f'<td><span class="badge {status_class}">{r.overall_status}</span></td>'
+            f"<td>{checks_str}</td>"
+            f"<td>{r.timestamp.strftime('%Y-%m-%d %H:%M:%S')}</td>"
+            f"</tr>\n"
+        )
+
+    passed = sum(1 for r in results if r.overall_status == "PASS")
+    failed = sum(
+        1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL")
+    )
+    errors = sum(1 for r in results if r.overall_status == "ERROR")
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    html = _HTML_TEMPLATE.format(
+        passed=passed,
+        failed=failed,
+        errors=errors,
+        total=len(results),
+        rows_html=rows_html,
+        generated_at=generated_at,
+    )
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
 
 
+# ---------------------------------------------------------------------------
+# Terminal summary
+# ---------------------------------------------------------------------------
+
+
 def print_summary(results: list[AuditReport]) -> None:
+    """Print a compact human summary to stdout."""
     passed = sum(1 for r in results if r.overall_status == "PASS")
-    failed = sum(1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL"))
+    failed = sum(
+        1 for r in results if r.overall_status in ("FAIL", "CRITICAL_FAIL")
+    )
     errors = sum(1 for r in results if r.overall_status == "ERROR")
     total = len(results)
 
@@ -174,12 +222,21 @@ def print_summary(results: list[AuditReport]) -> None:
     print()
 
 
+# ---------------------------------------------------------------------------
+# Batch runner
+# ---------------------------------------------------------------------------
+
+
 async def run_batch(
-    urls: list[str],
+    urls: Sequence[str],
     parallel: int = 5,
     timeout: float = 10.0,
     mode: str = "standard",
 ) -> list[AuditReport]:
+    """Run the auditor on every URL with bounded parallelism.
+
+    Progress is printed to stderr every 10 (or final) URLs.
+    """
     semaphore = asyncio.Semaphore(parallel)
     total = len(urls)
 
@@ -198,15 +255,21 @@ async def run_batch(
         if completed % 10 == 0 or completed == total:
             elapsed = time.monotonic() - start
             rate = completed / elapsed if elapsed > 0 else 0
-            print(f"  Progress: {completed}/{total} ({rate:.1f} URLs/sec)", file=sys.stderr)
+            print(
+                f"  Progress: {completed}/{total} ({rate:.1f} URLs/sec)",
+                file=sys.stderr,
+            )
 
     elapsed = time.monotonic() - start
-    print(f"\nCompleted {total} URLs in {elapsed:.1f}s ({total/elapsed:.1f} URLs/sec avg)", file=sys.stderr)
+    print(
+        f"\nCompleted {total} URLs in {elapsed:.1f}s ({total/elapsed:.1f} URLs/sec avg)",
+        file=sys.stderr,
+    )
     return results
 
 
 async def audit_async(
-    urls: list[str],
+    urls: Sequence[str],
     parallel: int = 5,
     timeout: float = 10.0,
     mode: str = "standard",
@@ -216,34 +279,61 @@ async def audit_async(
 
 def audit_command(
     input_file: str,
-    output: list[str] | None = None,
+    output: Sequence[str] | str | None = None,
     parallel: int = 5,
     timeout: float = 10.0,
     output_path: str | None = None,
     results: list[AuditReport] | None = None,
     mode: str = "standard",
 ) -> None:
+    """Run a batch audit end-to-end: read URLs, run, write reports, print summary.
+
+    Args:
+        input_file: Path to a file with one URL per line.
+        output: One or more of ``"csv"``, ``"json"``, ``"html"``. A single
+                string is also accepted for backward-compat.
+        parallel: Max concurrent ``httpx`` requests.
+        timeout: Per-request timeout (seconds).
+        output_path: If exactly one output format is selected, write to this
+                     path. Otherwise write to ``<input>.<format>``.
+        results: Pre-computed results (skip the actual audit; handy for tests).
+        mode: ``"standard"`` or ``"marketplace"``.
+    """
     if output is None:
         output = ["csv"]
+    if isinstance(output, str):
+        output = [output]
+    formats: list[str] = list(output)
+
     if results is None:
         urls = read_urls_from_file(input_file)
         if not urls:
             print("Error: no URLs found in input file", file=sys.stderr)
             sys.exit(1)
         print(f"Read {len(urls)} URLs from {input_file}", file=sys.stderr)
-        results = asyncio.run(run_batch(urls, parallel=parallel, timeout=timeout, mode=mode))
+        results = asyncio.run(
+            run_batch(urls, parallel=parallel, timeout=timeout, mode=mode)
+        )
 
     writers = {"csv": write_csv, "json": write_json, "html": write_html}
     base = os.path.splitext(input_file)[0]
-    for fmt in output:
-        if output_path and len(output) == 1:
+    for fmt in formats:
+        if output_path and len(formats) == 1:
             path = output_path
         else:
             path = f"{base}_results.{fmt}"
+        if fmt not in writers:
+            print(f"Error: unknown output format {fmt!r}", file=sys.stderr)
+            sys.exit(2)
         writers[fmt](results, path)
         print(f"Results written to: {path}", file=sys.stderr)
 
     print_summary(results)
+
+
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
 
 
 def main() -> None:
@@ -258,16 +348,37 @@ def main() -> None:
         ),
     )
     parser.add_argument("input_file", help="File with one URL per line")
-    parser.add_argument("--output", nargs="*", choices=["csv", "json", "html"], default=["csv"], help="Output format(s): csv, json, html")
-    parser.add_argument("--parallel", type=int, default=5, help="Concurrent workers (default: 5)")
-    parser.add_argument("--timeout", type=float, default=10.0, help="Request timeout in seconds")
-    parser.add_argument("--output-path", help="Output file path (default: <input>_results.<ext>)")
-    parser.add_argument("--mode", choices=["standard", "marketplace"], default="standard", help="Audit mode: standard (single endpoint) or marketplace (multi-product)")
+    parser.add_argument(
+        "--output",
+        nargs="*",
+        choices=["csv", "json", "html"],
+        default=["csv"],
+        help="Output format(s): csv, json, html (default: csv)",
+    )
+    parser.add_argument(
+        "--parallel", type=int, default=5, help="Concurrent workers (default: 5)"
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=10.0,
+        help="Request timeout in seconds (default: 10)",
+    )
+    parser.add_argument(
+        "--output-path",
+        help="Output file path (default: <input>_results.<ext>)",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["standard", "marketplace"],
+        default="standard",
+        help="Audit mode: standard (single endpoint) or marketplace (multi-product)",
+    )
     args = parser.parse_args()
 
     audit_command(
         input_file=args.input_file,
-        output=args.output,
+        output=args.output,  # argparse already returns a list
         parallel=args.parallel,
         timeout=args.timeout,
         output_path=args.output_path,

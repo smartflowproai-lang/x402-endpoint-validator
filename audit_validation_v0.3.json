@@ -1,0 +1,1935 @@
+{
+  "generated_at": "2026-07-27T10:08:16.405472+00:00",
+  "total_endpoints": 27,
+  "elapsed_seconds": 5.191996,
+  "rate_per_second": 5.2,
+  "summary": {
+    "pass": 0,
+    "fail": 27,
+    "error": 0
+  },
+  "results": [
+    {
+      "target_url": "https://api.x-402.online",
+      "timestamp": "2026-07-27T10:08:16.443506Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://api.x-402.online/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['description', 'discovery', 'name', 'payment', 'resources', 'x402Version'].",
+          "details": {
+            "url": "https://api.x-402.online/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "age": "0",
+              "cache-control": "public, max-age=0, must-revalidate",
+              "content-encoding": "gzip",
+              "content-type": "application/json; charset=utf-8",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "etag": "W/\"54d7-AZ7UTNEcez9NF28YgHNX9kaaANg\"",
+              "link": "<https://api.x-402.online/>; rel=\"api-catalog\"; type=\"application/json\", <https://api.x-402.online/openapi.json>; rel=\"service-desc\"; type=\"application/json\", <https://api.x-402.online/llms.txt>; rel=\"describedby\"; type=\"text/plain\", <https://api.x-402.online/.well-known/x402>; rel=\"payment\", <https://api.x-402.online/.well-known/agent-skills.json>; rel=\"agent-skills\"; type=\"application/json\", <https://api.x-402.online/.well-known/mcp>; rel=\"mcp-server\"; type=\"application/json\"",
+              "server": "Vercel",
+              "strict-transport-security": "max-age=63072000",
+              "x-powered-by": "Express",
+              "x-vercel-cache": "MISS",
+              "x-vercel-id": "iad1::iad1::grtsf-1785146896183-e1880a73175a",
+              "transfer-encoding": "chunked"
+            },
+            "received_keys": [
+              "description",
+              "discovery",
+              "name",
+              "payment",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://ozmium.org",
+      "timestamp": "2026-07-27T10:08:16.452683Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://ozmium.org/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['catalog', 'categories', 'description', 'name', 'openapi', 'resources'].",
+          "details": {
+            "url": "https://ozmium.org/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "cf-placement": "local-DFW",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=ESL%2Fi4KgNuQQ7f6hM%2FaaTOW3maPRJaiDQMcmLtPNiHWYtXYAW0LHAPDYlOZBJIu625jS1Az8is8BiegoyJen3799Aw8Pyu7FxB%2BYLWcAMbRAp1CLy9odEPyNVe6T\"}]}",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "access-control-allow-origin": "*",
+              "access-control-allow-headers": "Content-Type",
+              "access-control-allow-methods": "GET, OPTIONS",
+              "content-encoding": "gzip",
+              "speculation-rules": "\"/cdn-cgi/speculation\"",
+              "server": "cloudflare",
+              "cf-cache-status": "DYNAMIC",
+              "vary": "accept-encoding",
+              "cf-ray": "a21ad7859b898d34-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "catalog",
+              "categories",
+              "description",
+              "name",
+              "openapi",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.kaspa-402.org",
+      "timestamp": "2026-07-27T10:08:16.458793Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://www.kaspa-402.org/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://www.kaspa-402.org/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "age": "16008",
+              "cache-control": "public, max-age=0, must-revalidate",
+              "content-disposition": "inline; filename=\"404\"",
+              "content-encoding": "gzip",
+              "content-type": "text/html; charset=utf-8",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "etag": "W/\"bee9c069a74e754887cba9b11953fa14\"",
+              "last-modified": "Mon, 27 Jul 2026 05:41:27 GMT",
+              "server": "Vercel",
+              "strict-transport-security": "max-age=63072000",
+              "x-matched-path": "/404",
+              "x-vercel-cache": "HIT",
+              "x-vercel-id": "iad1::n6j29-1785146896233-dac40d8cefca",
+              "transfer-encoding": "chunked"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agentic.market",
+      "timestamp": "2026-07-27T10:08:16.464493Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://agentic.market/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://agentic.market/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "text/html; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+              "set-cookie": "__cf_bm=DUOIi4yp7TXlpw1vEzkEgd6wqApDRcIIfB.Hk._pz.k-1785146896.1390529-1.0.1.1-d8tR_2dZXcp1GZ7A2al_NJS451k3QrvxcWleT3LypDF2DYDbZ.0b67k1lurjRBqNPOVWQsNfzZKa7hv068klN38BfkEbqxxp8oP_ZU4eefBqlhhSONnbLAozETzi_0Vl; HttpOnly; SameSite=None; Secure; Path=/; Domain=agentic.market; Expires=Mon, 27 Jul 2026 10:38:16 GMT",
+              "content-security-policy": "frame-ancestors 'none'",
+              "server": "cloudflare",
+              "trace-id": "3378646175686266415",
+              "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding",
+              "x-frame-options": "DENY",
+              "x-nextjs-cache": "HIT",
+              "x-nextjs-prerender": "1, 1",
+              "x-nextjs-stale-time": "300",
+              "cf-cache-status": "DYNAMIC",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad784d90aae76-QRO"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.x402scan.com",
+      "timestamp": "2026-07-27T10:08:16.470201Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://www.x402scan.com/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://www.x402scan.com/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "age": "103921",
+              "cache-control": "public, max-age=0, must-revalidate",
+              "content-disposition": "inline; filename=\"404\"",
+              "content-encoding": "gzip",
+              "content-type": "text/html; charset=utf-8",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "etag": "W/\"759326dff678417ee938d404b11fefb7\"",
+              "last-modified": "Sun, 26 Jul 2026 05:16:14 GMT",
+              "link": "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\"",
+              "server": "Vercel",
+              "strict-transport-security": "max-age=63072000",
+              "x-matched-path": "/404",
+              "x-next-error-status": "404",
+              "x-vercel-cache": "HIT",
+              "x-vercel-id": "iad1::46qs5-1785146896174-8d0114121f3c",
+              "transfer-encoding": "chunked"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://data.greeneris.io",
+      "timestamp": "2026-07-27T10:08:16.476271Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://data.greeneris.io/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['resources', 'service', 'updatedAt', 'x402Version'].",
+          "details": {
+            "url": "https://data.greeneris.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "content-type": "application/json",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "server": "railway-hikari",
+              "x-railway-request-id": "8fjcxebrRxyMXzAF9fVATg",
+              "content-encoding": "gzip",
+              "x-hikari-trace": "lax1.v9kt",
+              "x-railway-edge": "lax1",
+              "vary": "accept-encoding",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive"
+            },
+            "received_keys": [
+              "resources",
+              "service",
+              "updatedAt",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agents.oromi.co.uk",
+      "timestamp": "2026-07-27T10:08:16.482063Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://agents.oromi.co.uk/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['resources', 'version'].",
+          "details": {
+            "url": "https://agents.oromi.co.uk/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "etag": "W/\"2609-pth6CnXn0nusXEtf9E0TjAO5an4\"",
+              "rndr-id": "02c819f8-5aa5-4cc1",
+              "server": "cloudflare",
+              "vary": "Accept-Encoding",
+              "x-powered-by": "Express",
+              "x-render-origin-server": "Render",
+              "cf-cache-status": "DYNAMIC",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad7858c04447f-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "resources",
+              "version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://counterra.xyz",
+      "timestamp": "2026-07-27T10:08:16.487473Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://counterra.xyz/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://counterra.xyz/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "connection": "keep-alive",
+              "content-length": "5254",
+              "server": "GitHub.com",
+              "content-type": "text/html; charset=utf-8",
+              "access-control-allow-origin": "*",
+              "etag": "W/\"6a63df58-24a3\"",
+              "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; connect-src 'self'",
+              "content-encoding": "gzip",
+              "x-proxy-cache": "MISS",
+              "x-github-request-id": "D854:34BF81:18829B0:1A5A652:6A672DF4",
+              "accept-ranges": "bytes",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "via": "1.1 varnish",
+              "age": "27",
+              "x-served-by": "cache-dfw-kdal2120036-DFW",
+              "x-cache": "HIT",
+              "x-cache-hits": "1",
+              "x-timer": "S1785146896.207160,VS0,VE1",
+              "vary": "Accept-Encoding",
+              "x-fastly-request-id": "da18d520033c71d7fc4add4b90d994483262cd16"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://call.kelam.sh",
+      "timestamp": "2026-07-27T10:08:16.492736Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://call.kelam.sh/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['description', 'instructions', 'name', 'resources', 'version', 'x402Version'].",
+          "details": {
+            "url": "https://call.kelam.sh/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=xkJZYpWKepqAaPhDSLGMQXPOwQa6K6PgA4N1UBxQIl8yawu8%2FgZwjypy%2Bj%2FkCZb9Bj6rktf2rTTO0AItbpDSKK0gdcnOjqjkN9YMwnLuk4ARJEFD%2BHYnJ9OKDb%2FEsMGR\"}]}",
+              "content-encoding": "gzip",
+              "server": "cloudflare",
+              "cf-ray": "a21ad7859cb71443-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "description",
+              "instructions",
+              "name",
+              "resources",
+              "version",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://toolrail.dev",
+      "timestamp": "2026-07-27T10:08:16.498168Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://toolrail.dev/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['description', 'llms_txt', 'mcp', 'name', 'openapi', 'resources'].",
+          "details": {
+            "url": "https://toolrail.dev/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "access-control-allow-headers": "Content-Type, Authorization, X-PAYMENT, PAYMENT, PAYMENT-SIGNATURE",
+              "access-control-allow-methods": "GET, POST, OPTIONS",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE, Content-Disposition",
+              "cf-cache-status": "DYNAMIC",
+              "etag": "W/\"1f8e-387LIiKYZQK2c//cIjYHxVJSji4\"",
+              "referrer-policy": "no-referrer",
+              "rndr-id": "fc1b3763-35d2-409e",
+              "server": "cloudflare",
+              "strict-transport-security": "max-age=31536000; includeSubDomains",
+              "vary": "Accept-Encoding",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "DENY",
+              "x-render-origin-server": "Render",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad78589496f98-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "description",
+              "llms_txt",
+              "mcp",
+              "name",
+              "openapi",
+              "resources",
+              "skill",
+              "website",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://mcp.viridisconservation.com",
+      "timestamp": "2026-07-27T10:08:16.503741Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://mcp.viridisconservation.com/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['buyer_skill', 'gateway', 'independent_evidence', 'intro_pricing', 'llms_txt', 'quickstart'].",
+          "details": {
+            "url": "https://mcp.viridisconservation.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "alt-svc": "h3=\":443\"; ma=2592000",
+              "content-length": "21058",
+              "content-type": "application/json",
+              "date": "Mon, 27 Jul 2026 10:08:15 GMT",
+              "server": "uvicorn",
+              "via": "1.1 Caddy"
+            },
+            "received_keys": [
+              "buyer_skill",
+              "gateway",
+              "independent_evidence",
+              "intro_pricing",
+              "llms_txt",
+              "quickstart",
+              "routes",
+              "spec_version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.hyperextend.xyz",
+      "timestamp": "2026-07-27T10:08:16.509470Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://api.hyperextend.xyz/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://api.hyperextend.xyz/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "alt-svc": "h3=\":443\"; ma=2592000",
+              "content-type": "text/plain; charset=utf-8",
+              "server": "Caddy",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-length": "9"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://x402.asterpay.io",
+      "timestamp": "2026-07-27T10:08:16.515398Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "PASS",
+          "message": "Manifest at https://x402.asterpay.io/.well-known/x402 is valid and contains 'accepts'.",
+          "details": {
+            "url": "https://x402.asterpay.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": true,
+            "has_products": false,
+            "product_count": 0,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE, WWW-Authenticate, Payment-Receipt",
+              "cache-control": "no-store, no-cache, must-revalidate",
+              "content-security-policy": "default-src 'self';script-src 'self' 'unsafe-inline';style-src 'self' 'unsafe-inline';img-src 'self' data: https:;connect-src 'self' https:;base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';object-src 'none';script-src-attr 'none';upgrade-insecure-requests",
+              "cross-origin-resource-policy": "cross-origin",
+              "origin-agent-cluster": "?1",
+              "referrer-policy": "no-referrer",
+              "server": "cloudflare",
+              "strict-transport-security": "max-age=15552000; includeSubDomains",
+              "x-content-type-options": "nosniff",
+              "x-dns-prefetch-control": "off",
+              "x-download-options": "noopen",
+              "x-frame-options": "SAMEORIGIN",
+              "x-permitted-cross-domain-policies": "none",
+              "x-railway-request-id": "bqfKI_JOQ8-R9qS0pHNmDw",
+              "x-ratelimit-limit": "1000",
+              "x-ratelimit-remaining": "995",
+              "x-ratelimit-reset": "35",
+              "x-xss-protection": "0",
+              "content-encoding": "gzip",
+              "x-hikari-trace": "atl1.mwdw",
+              "x-railway-edge": "atl1",
+              "vary": "accept-encoding",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=OlCrg5bJ9A7n1qAUP1u7FRqDsfvZZVakvRPmIKplcg3krKM58P8haJ12J%2FoU60KEYgYrwkKNjp5q9BN%2BZz%2FexfyNDsRyIz3fKHHvdra0UBf7RbMqkEHGoLfkJWT%2F1hkfFA2l\"}]}",
+              "cf-ray": "a21ad7858a7d69e2-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "3/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://pro-api.coinmarketcap.com",
+      "timestamp": "2026-07-27T10:08:16.521152Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://pro-api.coinmarketcap.com/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://pro-api.coinmarketcap.com/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "x-traefik-route": "coinmarketcap-pro-apis",
+              "content-encoding": "gzip",
+              "server": "Tengine",
+              "vary": "Accept-Encoding",
+              "cache-control": "no-cache",
+              "x-cache": "Error from cloudfront",
+              "via": "1.1 63fb2cfcc9cc0106a22c245b5c547788.cloudfront.net (CloudFront)",
+              "x-amz-cf-pop": "MIA50-P3",
+              "x-amz-cf-id": "2cXBKMCyX5-FO64ZjmxQ6ZmpUfOqcEwhUyh2L9sk2V3G8a8fGele3g=="
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://www.cloudworldmodel.ai",
+      "timestamp": "2026-07-27T10:08:16.526757Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://www.cloudworldmodel.ai/.well-known/x402 returned HTTP 200 but the body is not valid JSON. The manifest must parse as JSON. Fix: serve application/json with a valid object body.",
+          "details": {
+            "url": "https://www.cloudworldmodel.ai/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "access-control-allow-credentials": "true",
+              "cache-control": "private",
+              "content-length": "3498",
+              "content-type": "text/html; charset=utf-8",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "expires": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "permissions-policy": "webmcp=*",
+              "server": "Google Frontend",
+              "set-cookie": "GAESA=Cp4BMDAxNTQ4ZjcyOTYxNDE1NjU3ZDU2MmI0NmE0OTFjZjI4MmE3ZTljMDkwNGRiZTI1NDg1NmEwYTgzOWVmODFkM2FhMzVlNWM5ZWJmM2E1ZGM3MWNmODE4OTExOGI4MDdmOTkyZGY4YzdkODdkYWVlOGE3Y2VlM2FiZWMyMWUzOTRlNTRlNDQyNDA4NWFhZDg0ZDA2NmM3NWVmNjk3ZDgQvt-vmPoz; expires=Wed, 26-Aug-2026 10:08:16 GMT; path=/",
+              "strict-transport-security": "max-age=63072000; includeSubDomains",
+              "vary": "Origin",
+              "x-cloud-trace-context": "6996c793ac24cf4ae4a2099b496e8fb0",
+              "x-powered-by": "Express",
+              "via": "1.1 google",
+              "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://verify.smartflowproai.com",
+      "timestamp": "2026-07-27T10:08:16.532460Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://verify.smartflowproai.com/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['lastUpdated', 'metadata', 'payment', 'provider', 'resources', 'x402Version'].",
+          "details": {
+            "url": "https://verify.smartflowproai.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "server": "nginx",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json",
+              "content-length": "4135",
+              "last-modified": "Fri, 24 Jul 2026 17:44:51 GMT",
+              "connection": "keep-alive",
+              "etag": "\"6a63a493-1027\"",
+              "access-control-allow-origin": "*",
+              "cache-control": "public, max-age=300",
+              "accept-ranges": "bytes"
+            },
+            "received_keys": [
+              "lastUpdated",
+              "metadata",
+              "payment",
+              "provider",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://observer.137-184-67-179.sslip.io",
+      "timestamp": "2026-07-27T10:08:16.538113Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "PASS",
+          "message": "Manifest at https://observer.137-184-67-179.sslip.io/.well-known/x402 is a marketplace catalog with 2 product(s).",
+          "details": {
+            "url": "https://observer.137-184-67-179.sslip.io/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": true,
+            "product_count": 2,
+            "headers": {
+              "alt-svc": "h3=\":443\"; ma=2592000",
+              "content-encoding": "gzip",
+              "content-type": "application/json",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "server": "Caddy, Werkzeug/3.1.8 Python/3.12.3",
+              "vary": "Accept-Encoding",
+              "x-observer-boundary": "mainnet-live x402 adapter; experimental analytics only; not financial advice",
+              "x-observer-service": "observer-x402-demo",
+              "content-length": "1812"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "3/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.smartflowproai.com",
+      "timestamp": "2026-07-27T10:08:16.543639Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://api.smartflowproai.com/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['lastUpdated', 'metadata', 'payment', 'provider', 'resources', 'x402Version'].",
+          "details": {
+            "url": "https://api.smartflowproai.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "server": "nginx/1.24.0 (Ubuntu)",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "content-length": "3316",
+              "connection": "keep-alive",
+              "x-powered-by": "Express",
+              "etag": "W/\"cf4-W4NRFU+Dlv4opvAmSD4hRLkRUVI\"",
+              "access-control-allow-origin": "*",
+              "access-control-allow-methods": "GET, OPTIONS",
+              "access-control-allow-headers": "Content-Type, Authorization, X-PAYMENT"
+            },
+            "received_keys": [
+              "lastUpdated",
+              "metadata",
+              "payment",
+              "provider",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://defi.hugen.tokyo",
+      "timestamp": "2026-07-27T10:08:16.548861Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://defi.hugen.tokyo/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['instructions', 'resources', 'version'].",
+          "details": {
+            "url": "https://defi.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:17 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "server": "cloudflare",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=%2FrLvsPp5HvcLCTPqVlVKDpA9mATeXJ0XTiewcholSSXRsZz%2B5g7TJ5zhgpOStYjCRyc26axVj1dnBdkszFPpg892D%2BDotBhNIKxZAsI%2BJpjBPnyDEytJh%2Fp6tsENohXWPnn8\"}]}",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad78a086ff078-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "instructions",
+              "resources",
+              "version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://intel.hugen.tokyo",
+      "timestamp": "2026-07-27T10:08:16.555060Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://intel.hugen.tokyo/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['instructions', 'resources', 'version'].",
+          "details": {
+            "url": "https://intel.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "server": "cloudflare",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=UZvE8QZKrqc8oqKL9%2F%2FUrtbFJEaM7y%2FGp0nGGWrENLfP%2FRUhYNMUobBhTIEBbxrTOBI9OV0U9VjtknLDad04o3jpEdlQvngCeTpiNb0aieC3BBKYQA1zauQj1PtxrGp8yG9FRg%3D%3D\"}]}",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad785acaf6b83-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "instructions",
+              "resources",
+              "version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://mcp.hugen.tokyo",
+      "timestamp": "2026-07-27T10:08:16.560730Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://mcp.hugen.tokyo/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://mcp.hugen.tokyo/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "text/plain; charset=utf-8",
+              "content-length": "9",
+              "connection": "keep-alive",
+              "server": "cloudflare",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=SCuCvagRBdJx6iLxV9%2FbnKCa6cEfDhRswz4qYsAlOUTtrQbPv9VAoSAJU42NSP9LTlYeiG81bZsc0AGV%2B05O%2FlbZxZLJlz6Othg1WQuEldIsBRcabQ%2FoQ%2BOl8rF73XBF%2FuY%3D\"}]}",
+              "cf-ray": "a21ad785a83f4774-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://whale.hugen.tokyo",
+      "timestamp": "2026-07-27T10:08:16.566704Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://whale.hugen.tokyo/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['instructions', 'resources', 'version'].",
+          "details": {
+            "url": "https://whale.hugen.tokyo/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:17 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "server": "cloudflare",
+              "cf-cache-status": "DYNAMIC",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=9ManYx2w1vRtKTEAdbuEaHeBCSXWJI3V6KlkDc3boEYmMj4cTSirB5XyZByC6q1732EKDc6TXJcFxI4OXtW68I%2BsjYwIFa7Gr8T9IC9zQWcwjeK4frvlt57kkHfsT1vrWwySYA%3D%3D\"}]}",
+              "content-encoding": "gzip",
+              "cf-ray": "a21ad7878f6b6c0d-DFW",
+              "alt-svc": "h3=\":443\"; ma=86400"
+            },
+            "received_keys": [
+              "instructions",
+              "resources",
+              "version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 404 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 404,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://agent.weatherxm.com",
+      "timestamp": "2026-07-27T10:08:16.572229Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://agent.weatherxm.com/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['instructions', 'ownershipProofs', 'resources', 'version'].",
+          "details": {
+            "url": "https://agent.weatherxm.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "X-PAYMENT-RESPONSE",
+              "cross-origin-embedder-policy": "credentialless",
+              "cross-origin-opener-policy": "same-origin-allow-popups",
+              "vary": "accept-encoding",
+              "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=9SzWb71EKkVeVqzI5MyhdN4vK1I6vBWrKuy2VngcknsreF%2F6ZHL%2B4KjDODGbjxSu4KHpFdZKU5%2F6apVlsXNjO7J4MCrtl5aSJpufaOpqEz3xe%2BPyjltOe7jgCEfs07Qm7%2ByFpOY%3D\"}]}",
+              "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+              "content-encoding": "gzip",
+              "server": "cloudflare",
+              "cf-ray": "a21ad7859f5a2660-DFW"
+            },
+            "received_keys": [
+              "instructions",
+              "ownershipProofs",
+              "resources",
+              "version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://api.web3identity.com",
+      "timestamp": "2026-07-27T10:08:16.578660Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://api.web3identity.com/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['info', 'resources', 'x402Version'].",
+          "details": {
+            "url": "https://api.web3identity.com/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "server": "nginx",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "content-type": "application/json; charset=utf-8",
+              "transfer-encoding": "chunked",
+              "connection": "keep-alive",
+              "access-control-allow-origin": "*",
+              "access-control-allow-methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+              "access-control-allow-headers": "Content-Type, X-API-Key, Authorization, x-payment, payment-signature, X-Payment, Payment-Signature",
+              "access-control-expose-headers": "payment-required, x-payment, x-cache, x-cache-ttl, x-ratelimit-limit, x-ratelimit-remaining, x-ratelimit-reset, x-ratelimit-tier, x-ratelimit-tier-limit, x-ratelimit-tier-remaining, x-ratelimit-global-used, x-ratelimit-global-limit",
+              "access-control-max-age": "86400",
+              "x-content-type-options": "nosniff, nosniff",
+              "x-frame-options": "DENY, DENY",
+              "x-xss-protection": "1; mode=block, 1; mode=block",
+              "referrer-policy": "strict-origin-when-cross-origin, strict-origin-when-cross-origin",
+              "etag": "W/\"14271-ZPxLVQmQu7LJCNZvQ6FYuEkQCAw\"",
+              "x-response-time": "1ms",
+              "vary": "Accept-Encoding",
+              "content-encoding": "gzip",
+              "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+              "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.web3identity.com https://*.ethereum.org https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.web3identity.com https://*.ethereum.org https://*.eth.limo https://ethereum.publicnode.com https://rpc.ankr.com https://base.llamarpc.com https://api.ethfollow.xyz wss://*.ethereum.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+              "permissions-policy": "geolocation=(), microphone=(), camera=()"
+            },
+            "received_keys": [
+              "info",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://apinow.fun",
+      "timestamp": "2026-07-27T10:08:16.584537Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest at https://apinow.fun/.well-known/x402 is valid JSON but lacks the required 'accepts' key (per-resource pricing) and the optional 'products' array (marketplace catalog). Fix: include either 'accepts' (with scheme/network/amount) or 'products' (each with id/endpoint/x402). Got keys: ['facilitator', 'resources', 'x402Version'].",
+          "details": {
+            "url": "https://apinow.fun/.well-known/x402",
+            "status_code": 200,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "age": "38",
+              "cache-control": "public, max-age=60",
+              "content-encoding": "gzip",
+              "content-type": "application/json",
+              "date": "Mon, 27 Jul 2026 10:07:37 GMT",
+              "server": "Vercel",
+              "strict-transport-security": "max-age=63072000",
+              "vary": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+              "x-matched-path": "/.well-known/x402",
+              "x-vercel-cache": "HIT",
+              "x-vercel-id": "iad1::iad1::b6t8p-1785146896351-3021061d9219",
+              "transfer-encoding": "chunked"
+            },
+            "received_keys": [
+              "facilitator",
+              "resources",
+              "x402Version"
+            ]
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://stabletravel.dev",
+      "timestamp": "2026-07-27T10:08:16.590671Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "FAIL",
+          "message": "Manifest endpoint not found at https://stabletravel.dev/.well-known/x402. The x402 spec requires a JSON manifest at /.well-known/x402 with either an 'accepts' key (resource pricing) or a 'products' array (marketplace catalog). Add the file to your origin.",
+          "details": {
+            "url": "https://stabletravel.dev/.well-known/x402",
+            "status_code": 404,
+            "has_accepts": false,
+            "has_products": false,
+            "headers": {
+              "access-control-allow-origin": "*",
+              "age": "150723",
+              "cache-control": "public, max-age=0, must-revalidate",
+              "content-disposition": "inline; filename=\"404\"",
+              "content-encoding": "gzip",
+              "content-type": "text/html; charset=utf-8",
+              "date": "Mon, 27 Jul 2026 10:08:16 GMT",
+              "etag": "W/\"abb883661ca24a5e0672cb79620fde0b\"",
+              "last-modified": "Sat, 25 Jul 2026 16:16:13 GMT",
+              "server": "Vercel",
+              "strict-transport-security": "max-age=63072000",
+              "x-matched-path": "/404",
+              "x-next-error-status": "404",
+              "x-vercel-cache": "HIT",
+              "x-vercel-id": "iad1::s7qps-1785146896188-67b6f7021311",
+              "transfer-encoding": "chunked"
+            }
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "PASS",
+          "message": "Endpoint returned HTTP 200 (not 402). JSON resilience check is not applicable; skipped. PASS.",
+          "details": {
+            "status_code": 200,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "2/4 checks passed. Overall: FAIL"
+    },
+    {
+      "target_url": "https://bazaar.viridis.io",
+      "timestamp": "2026-07-27T10:08:16.596165Z",
+      "overall_status": "FAIL",
+      "checks": [
+        {
+          "check_name": "manifest_discovery",
+          "status": "ERROR",
+          "message": "Could not reach manifest at https://bazaar.viridis.io/.well-known/x402: connection: [Errno -2] Name or service not known. Verify the URL is live.",
+          "details": {
+            "url": "https://bazaar.viridis.io/.well-known/x402",
+            "status_code": null,
+            "error": "[Errno -2] Name or service not known"
+          }
+        },
+        {
+          "check_name": "caip2_compliance",
+          "status": "FAIL",
+          "message": "No CAIP-2 network identifier found in any payment header. Headers probed: payment-required, x-402-accepts, www-authenticate. Fix: encode base64(json) of the PaymentRequired payload into one of these headers with a 'network' field in CAIP-2 form (e.g., 'eip155:8453' for Base mainnet).",
+          "details": {
+            "header_present": false,
+            "header_name": null,
+            "caip2_value": null,
+            "valid": false
+          }
+        },
+        {
+          "check_name": "json_resilience",
+          "status": "ERROR",
+          "message": "Connection error: [Errno -2] Name or service not known. Verify the endpoint is reachable.",
+          "details": {
+            "status_code": null,
+            "payload_type": null,
+            "is_dict": null
+          }
+        },
+        {
+          "check_name": "bazaar_compliance",
+          "status": "PASS",
+          "message": "No HTTP 402 body available; bazaar compliance check skipped. PASS (not applicable).",
+          "details": {
+            "bazaar_present": false,
+            "bazaar_method": null,
+            "bazaar_service_name": null,
+            "bazaar_tags": null,
+            "missing_fields": []
+          }
+        }
+      ],
+      "summary": "1/4 checks passed. Overall: FAIL"
+    }
+  ]
+}
