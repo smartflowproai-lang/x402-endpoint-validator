@@ -434,13 +434,20 @@ def check_bazaar_extension(obj: dict[str, Any] | None) -> BazaarResult:
                                                collected so far)
 
     Returns FAIL when the block exists but is missing ``info``, or ``info``
-    is missing ``input``/``output``, or those sub-objects are not dicts, or a
-    present ``schema`` is not itself an object. These are the failure modes
-    that would break a marketplace client parsing this block, not a strict
-    reading of fields no capture has ever required (no ``serviceName`` /
-    ``tags`` field exists in any of the four production captures; an earlier
-    draft of this check assumed a shape that does not match any real
-    merchant and would have failed 4/4 conformant Bazaar merchants).
+    is missing ``input``/``output``, or those sub-objects are not dicts, a
+    present ``schema`` is not itself an object, or ``input.type``,
+    ``input.method``, ``output.type`` are missing OR not strings. Values are
+    not pinned — ``"ftp"`` for ``input.type`` is not flagged, only a missing
+    or non-string value is — but the type itself is enforced: a marketplace
+    client parsing ``method: 7`` breaks the same way it breaks on a missing
+    field, which is the failure mode this check exists to catch.
+
+    These are the failure modes that would break a marketplace client
+    parsing this block, not a strict reading of fields no capture has ever
+    required (no ``serviceName`` / ``tags`` field exists in any of the four
+    production captures; an earlier draft of this check assumed a shape
+    that does not match any real merchant and would have failed 4/4
+    conformant Bazaar merchants).
     """
     if not isinstance(obj, dict):
         return BazaarResult(ok=True, present=False, failure_class=None)
@@ -473,17 +480,20 @@ def check_bazaar_extension(obj: dict[str, Any] | None) -> BazaarResult:
     if not isinstance(input_block, dict):
         findings.append("extensions.bazaar.info.input missing or not an object")
     else:
-        if not input_block.get("type"):
-            findings.append("extensions.bazaar.info.input.type missing")
-        if not input_block.get("method"):
-            findings.append("extensions.bazaar.info.input.method missing")
+        input_type = input_block.get("type")
+        if not isinstance(input_type, str) or not input_type:
+            findings.append("extensions.bazaar.info.input.type missing or not a string")
+        input_method = input_block.get("method")
+        if not isinstance(input_method, str) or not input_method:
+            findings.append("extensions.bazaar.info.input.method missing or not a string")
 
     output_block = info.get("output")
     if not isinstance(output_block, dict):
         findings.append("extensions.bazaar.info.output missing or not an object")
     else:
-        if not output_block.get("type"):
-            findings.append("extensions.bazaar.info.output.type missing")
+        output_type = output_block.get("type")
+        if not isinstance(output_type, str) or not output_type:
+            findings.append("extensions.bazaar.info.output.type missing or not a string")
 
     schema = bazaar.get("schema")
     if schema is not None and not isinstance(schema, dict):
