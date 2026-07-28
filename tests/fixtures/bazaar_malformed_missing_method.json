@@ -1,0 +1,19 @@
+{
+  "name": "bazaar_malformed_missing_method",
+  "constructed": true,
+  "note": "Synthetic negative fixture, not a merchant capture. Built to pin the failure mode where extensions.bazaar.info.input exists but omits the required 'method' key. No live endpoint audited so far has produced this shape; it exists purely to exercise check_bazaar_extension's error path.",
+  "status": 402,
+  "headers": {
+    "content-type": "application/json",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhbW91bnQiOiIxMDAwMCIsInBheVRvIjoiMHgxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MTIwfV0sImVycm9yIjoiUEFZTUVOVC1TSUdOQVRVUkUgcmVxdWlyZWQiLCJleHRlbnNpb25zIjp7ImJhemFhciI6eyJpbmZvIjp7ImlucHV0Ijp7InR5cGUiOiJodHRwIn0sIm91dHB1dCI6eyJ0eXBlIjoianNvbiIsImV4YW1wbGUiOnsib2siOnRydWV9fX19fX0="
+  },
+  "body": "{\"error\":\"PAYMENT-SIGNATURE required\"}",
+  "expect": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false,
+    "failure_class": null,
+    "bazaar_ok": false,
+    "bazaar_failure_class": "bazaar_malformed"
+  }
+}

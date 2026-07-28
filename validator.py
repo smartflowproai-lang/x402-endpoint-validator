@@ -55,6 +55,7 @@ except ImportError:  # pragma: no cover - yaml is in image but stay defensive
 
 from payment_required import (
     caip2_in_obj,
+    check_bazaar_extension,
     classify_failure,
     compare_channels,
     extract_payment_required,
@@ -421,6 +422,7 @@ def check_402_body(
     extracted = extract_payment_required(status, headers, body_text)
     mismatch_fields = compare_channels(extracted.header_obj, extracted.body_obj)
     channel_mismatch = bool(mismatch_fields)
+    bazaar = check_bazaar_extension(extracted.canonical)
 
     failure_class: str | None = None
     schemes: list[str] = []
@@ -467,7 +469,18 @@ def check_402_body(
             findings.append(
                 "header/body channel mismatch on: " + ", ".join(mismatch_fields)
             )
-        if validated.ok:
+        # Optional marketplace-discovery extension: surface the check result
+        # alongside the core findings when the block is present. Absent block
+        # stays silent (conformant). A malformed block does not flip the core
+        # 402 verdict — it is reported via bazaar_ok/bazaar_failure_class so a
+        # marketplace client breakage is visible in the report instead of
+        # silently passing as before.
+        if bazaar.present:
+            if bazaar.ok:
+                findings.append("extensions.bazaar block present and conformant")
+            else:
+                findings.extend(bazaar.findings)
+        if body_ok:
             if extracted.legacy_placement:
                 note = "402 with legacy body-only PaymentRequired"
             elif channel_mismatch:
@@ -503,6 +516,9 @@ def check_402_body(
         "caip2_in_header": caip2_in_obj(extracted.header_obj),
         "missing_keys": missing_keys,
         "x402_version": x402_version,
+        "bazaar_present": bazaar.present,
+        "bazaar_ok": bazaar.ok if bazaar.present else None,
+        "bazaar_failure_class": bazaar.failure_class if bazaar.present else None,
         "findings": findings,
         "strict_v2": strict_v2,
         "probed_at_utc": probed_at_utc,

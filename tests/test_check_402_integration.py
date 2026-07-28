@@ -1,9 +1,17 @@
 import base64
 import json
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from validator import check_402_body
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def _load_fixture(name):
+    with open(FIXTURES / f"{name}.json") as fh:
+        return json.load(fh)
 
 
 def _b64_json(obj):
@@ -139,6 +147,77 @@ class Check402BodyTask4ContractTests(unittest.TestCase):
         self.assertFalse(result["channel_mismatch"])
         mock_get.assert_called_once()
         mock_post.assert_not_called()
+
+
+class Check402BodyBazaarWiringTests(unittest.TestCase):
+    """The bazaar extension check must run through the real entry point, not
+    only when tests call the helper by hand. A merchant with a malformed
+    extensions.bazaar block previously got the same green report as a
+    merchant without one; now the report carries bazaar_ok /
+    bazaar_failure_class. The core 402 verdict is unchanged — the extension
+    is optional marketplace-discovery metadata, not part of the
+    PaymentRequired contract.
+    """
+
+    def _run_fixture(self, name):
+        case = _load_fixture(name)
+        response = MockResponse(case["status"], headers=case["headers"], text=case["body"])
+        with mock.patch("validator.requests.get", return_value=response), mock.patch(
+            "validator.requests.post", return_value=MockResponse(404, text="")
+        ):
+            return check_402_body("https://example.test/paywalled"), case
+
+    def test_malformed_bazaar_missing_method_surfaces_in_report(self):
+        result, case = self._run_fixture("bazaar_malformed_missing_method")
+
+        self.assertTrue(result["passed"])
+        self.assertIsNone(result["failure_class"])
+        self.assertTrue(result["bazaar_present"])
+        self.assertEqual(result["bazaar_ok"], case["expect"]["bazaar_ok"])
+        self.assertEqual(result["bazaar_failure_class"], case["expect"]["bazaar_failure_class"])
+        self.assertTrue(
+            any("bazaar" in finding for finding in result["findings"]),
+            result["findings"],
+        )
+
+    def test_malformed_bazaar_missing_output_surfaces_in_report(self):
+        result, case = self._run_fixture("bazaar_malformed_missing_output")
+
+        self.assertTrue(result["passed"])
+        self.assertIsNone(result["failure_class"])
+        self.assertTrue(result["bazaar_present"])
+        self.assertEqual(result["bazaar_ok"], case["expect"]["bazaar_ok"])
+        self.assertEqual(result["bazaar_failure_class"], case["expect"]["bazaar_failure_class"])
+        self.assertTrue(
+            any("bazaar" in finding for finding in result["findings"]),
+            result["findings"],
+        )
+
+    def test_conformant_bazaar_block_reports_ok(self):
+        result, _ = self._run_fixture("viridis_regulatory_radar")
+
+        self.assertTrue(result["passed"])
+        self.assertTrue(result["bazaar_present"])
+        self.assertTrue(result["bazaar_ok"])
+        self.assertIsNone(result["bazaar_failure_class"])
+
+    @mock.patch("validator.requests.post")
+    @mock.patch("validator.requests.get")
+    def test_absent_bazaar_block_stays_silent(self, mock_get, mock_post):
+        mock_get.return_value = MockResponse(
+            402,
+            headers={"payment-required": _b64_json(HEADER_PAYMENT_REQUIRED)},
+            json_data={"error": "payment required"},
+        )
+        mock_post.return_value = MockResponse(404)
+
+        result = check_402_body("https://example.test/paywalled")
+
+        self.assertTrue(result["passed"])
+        self.assertFalse(result["bazaar_present"])
+        self.assertIsNone(result["bazaar_ok"])
+        self.assertIsNone(result["bazaar_failure_class"])
+        self.assertFalse(any("bazaar" in finding for finding in result["findings"]))
 
 
 if __name__ == "__main__":
