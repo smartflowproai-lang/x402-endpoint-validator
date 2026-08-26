@@ -242,7 +242,7 @@ class StrictV2ReportMainTests(unittest.TestCase):
     def test_main_env_strict_v2_wires_summary_and_endpoint_probe_time(self):
         strict_values = []
 
-        def fake_check_402_body(url, probe_method="auto", strict_v2=False):
+        def fake_check_402_body(url, probe_method="auto", strict_v2=False, **kwargs):
             strict_values.append(strict_v2)
             return {
                 "passed": True,

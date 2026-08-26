@@ -8,7 +8,7 @@
 #   $4 pro-license-key (string; required when tier=pro)
 #   $5 webhook-url (Slack/Teams URL; pro only)
 #   $6 report-path (relative to workspace)
-#   $7 fail-on (any | critical | never)
+#   $7 fail-on (any | critical | manifest | never)
 #   $8 probe-method (auto | GET | POST)
 #   $9 strict-v2 (true | false)
 #

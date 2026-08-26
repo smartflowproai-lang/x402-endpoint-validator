@@ -150,6 +150,40 @@ class FixtureCorpusTests(unittest.TestCase):
         self.assertEqual(accepted["amount"], provenance["amount_atomic_usdc"])
         self.assertEqual(provenance["block"], 49064078)
 
+    def test_viridis_ghg_ledger(self):
+        self._assert_expect("viridis_ghg_ledger")
+
+        case = self._load("viridis_ghg_ledger")
+        extracted = extract_payment_required(
+            case["status"], case["headers"], case["body"]
+        )
+        self.assertIsNotNone(extracted.header_obj)
+
+        bazaar = extracted.header_obj["extensions"]["bazaar"]
+        input_info = bazaar["info"]["input"]
+        input_schema = bazaar["schema"]["properties"]["input"]
+        body_schema = input_schema["properties"]["body"]
+
+        self.assertEqual(input_info["method"], "POST")
+        self.assertEqual(input_info["bodyType"], "json")
+        # The manifest example body is the empty-activities skeleton, not the
+        # probe request; the schema is what binds the request shape.
+        self.assertEqual(input_info["body"], {"activities": []})
+        self.assertIn("activities", body_schema["properties"])
+        self.assertEqual(body_schema["required"], ["activities"])
+        self.assertEqual(
+            extracted.header_obj["resource"]["url"],
+            case["url"],
+        )
+        self.assertIn("ghg-ledger", extracted.header_obj["resource"]["tags"])
+        accepted = extracted.header_obj["accepts"][0]
+        provenance = case["provenance"]
+        # Unpaid preflight only: the challenge capture needs no settlement.
+        self.assertFalse(provenance["settled_flow_confirmed"])
+        self.assertEqual(accepted["network"], provenance["network"])
+        self.assertEqual(accepted["amount"], provenance["amount_atomic_usdc"])
+        self.assertEqual(accepted["payTo"], "0xfEf2e570b645EB720Ee6c589d27450810982f329")
+
 
 if __name__ == "__main__":
     unittest.main()

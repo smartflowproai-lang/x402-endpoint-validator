@@ -35,7 +35,7 @@ inputs:
     required: false
     default: 'x402-validator-report.json'
   fail-on:
-    description: 'When to set action status to fail: "any" (any check fails), "critical" (only manifest/402 issues), or "never".'
+    description: 'When to set action status to fail: "any" (any endpoint failed), "critical" (only 402 payment-conformance defects), "manifest" (only /.well-known/x402 defects), or "never".'
     required: false
     default: 'any'
   probe-method:
