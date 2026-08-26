@@ -93,6 +93,9 @@ class FixtureCorpusTests(unittest.TestCase):
         if expect.get("channel_mismatch"):
             self.assertTrue(result["channel_mismatch"], name)
 
+    def test_terradeed_scrape(self):
+        self._assert_expect("terradeed_scrape")
+
     def test_apinow_buzzwords(self):
         self._assert_expect("apinow_buzzwords")
 
