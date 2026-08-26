@@ -1,0 +1,19 @@
+{
+  "name": "bazaar_malformed_missing_output",
+  "constructed": true,
+  "note": "Synthetic negative fixture, not a merchant capture. Built to pin the failure mode where extensions.bazaar.info exists with a valid input block but omits 'output' entirely, while a schema object is present. No live endpoint audited so far has produced this shape; it exists purely to exercise check_bazaar_extension's error path.",
+  "status": 402,
+  "headers": {
+    "content-type": "application/json",
+    "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhbW91bnQiOiI1MDAwIiwicGF5VG8iOiIweDIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIiLCJhc3NldCI6IjB4ODMzNTg5ZkNENmVEYjZFMDhmNGM3QzMyRDRmNzFiNTRiZEEwMjkxMyIsIm1heFRpbWVvdXRTZWNvbmRzIjoxMjB9XSwiZXJyb3IiOiJQQVlNRU5ULVNJR05BVFVSRSByZXF1aXJlZCIsImV4dGVuc2lvbnMiOnsiYmF6YWFyIjp7ImluZm8iOnsiaW5wdXQiOnsidHlwZSI6Imh0dHAiLCJtZXRob2QiOiJHRVQifX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWEiLCJ0eXBlIjoib2JqZWN0In19fX0="
+  },
+  "body": "{\"error\":\"PAYMENT-SIGNATURE required\"}",
+  "expect": {
+    "passed": true,
+    "channel": "header",
+    "legacy_placement": false,
+    "failure_class": null,
+    "bazaar_ok": false,
+    "bazaar_failure_class": "bazaar_malformed"
+  }
+}

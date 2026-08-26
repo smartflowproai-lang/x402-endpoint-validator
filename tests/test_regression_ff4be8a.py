@@ -384,8 +384,14 @@ class ManifestDefectVisibilityTests(unittest.TestCase):
 # ---------------------------------------------------------- RS-9/RS-10 -----
 class VersionAndEvidenceTests(unittest.TestCase):
     def test_validator_version_is_bumped(self):
-        """1.2.0 shipped two engines with opposite verdicts on the same URLs."""
-        self.assertEqual(validator.VALIDATOR_VERSION, "1.3.0")
+        """1.2.0 shipped two engines with opposite verdicts on the same URLs.
+
+        The guarantee is "past 1.2.0", not a pin on one release: pinning the
+        exact string turned this into a tripwire that every bump has to edit,
+        which is how a version assert stops testing anything.
+        """
+        parts = tuple(int(p) for p in validator.VALIDATOR_VERSION.split("."))
+        self.assertGreater(parts, (1, 2, 0), validator.VALIDATOR_VERSION)
 
     def test_probe_attempts_reaches_the_report(self):
         """0 of 81 endpoint records carried this advertised evidence field."""

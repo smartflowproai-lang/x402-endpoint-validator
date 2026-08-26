@@ -70,13 +70,14 @@ from payment_required import (
     SEVERITY_INFO,
     SEVERITY_PASS,
     caip2_in_obj,
+    check_bazaar_extension,
     classify_failure,
     compare_channels,
     extract_payment_required,
     validate_accepts,
 )
 
-VALIDATOR_VERSION = "1.3.0"
+VALIDATOR_VERSION = "1.4.0"
 USER_AGENT = f"x402-endpoint-validator/{VALIDATOR_VERSION} (+https://smartflowproai.com/atlas)"
 DEFAULT_TIMEOUT_S = 10
 P95_SAMPLE_COUNT = 5
@@ -516,6 +517,13 @@ def check_402_body(
             "caip2_in_header": False,
             "missing_keys": [],
             "x402_version": None,
+            # No response was parsed, so the extension was never seen: same
+            # shape as an absent block, so report consumers do not KeyError on
+            # network-error records the way they would on the raw PR #16 wiring.
+            "bazaar_present": False,
+            "bazaar_ok": None,
+            "bazaar_failure_class": None,
+            "bazaar_severity": SEVERITY_INFO,
             "findings": [],
             "strict_v2": strict_v2,
             "expect": expect,
@@ -547,6 +555,28 @@ def check_402_body(
     extracted = extract_payment_required(status, headers, body_text)
     mismatch_fields = compare_channels(extracted.header_obj, extracted.body_obj)
     channel_mismatch = bool(mismatch_fields)
+    bazaar = check_bazaar_extension(extracted.canonical)
+    # Map the optional marketplace-discovery check onto the same three-state
+    # severity the payment checks use (1.4.0 merge of the two lines).
+    #
+    # Absent block is `info`, not `pass`: nothing was verified, and an
+    # unverified check must never be laundered into a pass — the same rule
+    # that governs auth_gated / unknown_network. `pass` here is reserved for
+    # a block that was actually present and actually conformed.
+    #
+    # A malformed block is a real `fail` for THIS check, carried on
+    # bazaar_severity + bazaar_failure_class="bazaar_malformed". It stays
+    # scoped to the extension: it does NOT enter the endpoint-level severity,
+    # because extensions.bazaar is marketplace-discovery metadata and not part
+    # of the PaymentRequired contract. Convicting a merchant's payment
+    # conformance over an optional block is precisely the false-positive class
+    # ff4be8a and the 1.3.0 audit removed.
+    if not bazaar.present:
+        bazaar_severity = SEVERITY_INFO
+    elif bazaar.ok:
+        bazaar_severity = SEVERITY_PASS
+    else:
+        bazaar_severity = SEVERITY_FAIL
 
     failure_class: str | None = None
     schemes: list[str] = []
@@ -608,7 +638,18 @@ def check_402_body(
             findings.append(
                 "header/body channel mismatch on: " + ", ".join(mismatch_fields)
             )
-        if validated.ok:
+        # Optional marketplace-discovery extension: surface the check result
+        # alongside the core findings when the block is present. Absent block
+        # stays silent (conformant). A malformed block does not flip the core
+        # 402 verdict — it is reported via bazaar_ok/bazaar_failure_class so a
+        # marketplace client breakage is visible in the report instead of
+        # silently passing as before.
+        if bazaar.present:
+            if bazaar.ok:
+                findings.append("extensions.bazaar block present and conformant")
+            else:
+                findings.extend(bazaar.findings)
+        if body_ok:
             if extracted.legacy_placement:
                 note = "402 with legacy body-only PaymentRequired"
             elif channel_mismatch:
@@ -646,6 +687,10 @@ def check_402_body(
         "caip2_in_header": caip2_in_obj(extracted.header_obj),
         "missing_keys": missing_keys,
         "x402_version": x402_version,
+        "bazaar_present": bazaar.present,
+        "bazaar_ok": bazaar.ok if bazaar.present else None,
+        "bazaar_failure_class": bazaar.failure_class if bazaar.present else None,
+        "bazaar_severity": bazaar_severity,
         "findings": findings,
         "strict_v2": strict_v2,
         "expect": expect,
