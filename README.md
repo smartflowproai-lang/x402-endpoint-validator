@@ -269,7 +269,7 @@ Matrix mode gives you per-endpoint check rows in the GitHub UI, so when one endp
 
 ## Why x402?
 
-x402 is the HTTP-native micropayments protocol formalized as a Linux Foundation standard in 2025. It revives the long-dormant `402 Payment Required` status code and gives it a real semantic: the server quotes a price in the body, the client (often an AI agent, sometimes a human) settles, the server returns the resource. No API keys, no signup flows, no Stripe webhook plumbing. Just a `402`, a settlement, and a `200`.
+x402 is the HTTP-native micropayments protocol introduced by Coinbase in 2025 and under formal, vendor-neutral Linux Foundation governance since July 2026. It revives the long-dormant `402 Payment Required` status code and gives it a real semantic: the server quotes a price in the body, the client (often an AI agent, sometimes a human) settles, the server returns the resource. No API keys, no signup flows, no Stripe webhook plumbing. Just a `402`, a settlement, and a `200`.
 
 The model matters because the consumers of paid APIs are quietly stopping being humans. Agents probe, evaluate, transact, and move on. They don't fill out signup forms. They don't store keys. They read the `402`, decide if the price is worth it, pay, and consume. That's the entire flow, and it scales to millions of micro-transactions in a way that subscription APIs never could.
 
@@ -341,4 +341,4 @@ MIT © 2026 Tom Smart. See `LICENSE`.
 
 ---
 
-*Built on the x402 protocol (Linux Foundation, 2025). Not affiliated with Coinbase, CDP, or the x402 Foundation — independent maintainer, open-source tooling.*
+*Built on the x402 protocol (introduced 2025; Linux Foundation governance since July 2026). Not affiliated with Coinbase, CDP, or the x402 Foundation — independent maintainer, open-source tooling.*
