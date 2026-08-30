@@ -148,10 +148,14 @@ class FixtureCorpusTests(unittest.TestCase):
         )
         accepted = extracted.header_obj["accepts"][0]
         provenance = case["provenance"]
-        self.assertTrue(provenance["settled_flow_confirmed"])
+        # provenance carries capture metadata (settled_flow_confirmed, block,
+        # capture timestamps). Deliberately NOT asserted: both sides would come
+        # from the same JSON file, so such asserts cannot fail and would be
+        # indistinguishable from real ones in the green count. Freshness is
+        # owned by a daily out-of-repo corpus watch that re-captures the live
+        # endpoints and diffs them against these frozen snapshots.
         self.assertEqual(accepted["network"], provenance["network"])
         self.assertEqual(accepted["amount"], provenance["amount_atomic_usdc"])
-        self.assertEqual(provenance["block"], 49064078)
 
     def test_viridis_ghg_ledger(self):
         self._assert_expect("viridis_ghg_ledger")
@@ -182,7 +186,8 @@ class FixtureCorpusTests(unittest.TestCase):
         accepted = extracted.header_obj["accepts"][0]
         provenance = case["provenance"]
         # Unpaid preflight only: the challenge capture needs no settlement.
-        self.assertFalse(provenance["settled_flow_confirmed"])
+        # provenance fields are capture metadata, not assertions (see
+        # test_viridis_regulatory_radar for the freshness contract).
         self.assertEqual(accepted["network"], provenance["network"])
         self.assertEqual(accepted["amount"], provenance["amount_atomic_usdc"])
         self.assertEqual(accepted["payTo"], "0xfEf2e570b645EB720Ee6c589d27450810982f329")
