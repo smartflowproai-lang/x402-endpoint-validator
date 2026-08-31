@@ -151,6 +151,24 @@ If a response only offers an L402/Lightning `WWW-Authenticate` challenge and no 
 
 ---
 
+## Fixture freshness
+
+Committed fixtures are deliberately frozen snapshots — the test suite proves the parser against bytes that never change. Freshness is owned by a daily out-of-repo watch, not by the tests:
+
+- `scripts/corpus_watch.py` runs daily (06:25 UTC). It reads every `tests/fixtures/*.json` on `origin/main` that carries a real live URL — the route list is derived from the corpus, not maintained by hand, so a new fixture is watched the moment it lands on main. Synthetic fixtures (`constructed` cases, `example.test` hosts) are excluded automatically.
+- Per route it issues the same unpaid preflight the fixture was captured with (no payment involved) and compares the live status and `PAYMENT-REQUIRED` challenge byte-for-byte against the stored value. Drift raises an alert; resolved drift produces a dated report in `watch-reports/`.
+- The two Viridis routes additionally run under a per-seller watch (the PR #14 commitment): the seller's `.well-known` index declares which commit, path and sha256 it pins, and that watch recomputes the hash over the pinned bytes and preflights the live endpoint daily.
+
+Capture-time metadata went through three field generations, oldest first:
+
+| field | fixtures | meaning |
+|---|---|---|
+| *(none)* | apinow, hugen, weatherxm, web3identity | capture date lives in the file's git history (`git log --format=%aI -- <path>`) |
+| `capture_date` / `captured_at` | both viridis | date-only, upgraded to a full timestamp mid-capture; **these two files cannot adopt newer fields** — their exact bytes are pinned by the seller's published sha256, so any edit on our side would itself be pin drift |
+| `captured_at_utc` | asterpay ×2, terradeed, stabletravel | full UTC timestamp written at capture time |
+
+stabletravel moved to the third generation on 2026-08-31, re-captured after the first full-corpus watch run flagged a rotated solana-leg `feePayer` — see `watch-reports/2026-08-31-corpus.md`.
+
 ## Usage examples
 
 ### Basic — validate one endpoint on push
