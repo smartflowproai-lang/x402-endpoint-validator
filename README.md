@@ -23,7 +23,7 @@ Out of the box, the Action runs **5 compliance checks**:
 - Payment-required behavior
 
 ```yaml
-- uses: smartflowproai-lang/x402-endpoint-validator@v1.0.1
+- uses: smartflowproai-lang/x402-endpoint-validator@v1
   with:
     endpoints: |
       https://api.example.com
@@ -41,7 +41,7 @@ Unlocks **enhanced intel per endpoint**:
 - **On-chain volume 30d** — USDC throughput tracked from our payments index
 
 ```yaml
-- uses: smartflowproai-lang/x402-endpoint-validator@v1.0.1
+- uses: smartflowproai-lang/x402-endpoint-validator@v1
   with:
     endpoints: ${{ github.event.repository.html_url }}
     api-key: ${{ secrets.SMARTFLOW_KEY }}
