@@ -11,3 +11,11 @@ Fixtures captured from POST routes may also include `request_body` so their
 published Bazaar input contract remains reproducible.
 `provenance` may record independently confirmed settlement facts while the
 fixture itself remains the non-paying unauthenticated quote.
+`volatile` (optional) lists challenge fields that change by construction —
+clocks, not seller action (path syntax: dot segments, `accepts[*]` fans out
+over a list). The corpus watch removes these leaves from BOTH the stored and
+the live challenge before declaring drift; a vector without this declaration
+is unfalsifiable in a way that imitates falsifiability, because every replay
+diverges and the reader cannot tell seller from clock. First case:
+stabletravel_airports, whose solana leg mints recentBlockhash /
+lastValidBlockHeight per request (~60s lifetime).

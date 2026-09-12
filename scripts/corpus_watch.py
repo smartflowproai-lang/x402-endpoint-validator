@@ -22,6 +22,17 @@ bytes: the parser never sees key order or whitespace, and a byte compare would
 also flap on per-request fields (asterpay re-issues WWW-Authenticate id/expires
 on every call, while its PAYMENT-REQUIRED and body stay stable).
 
+Volatile fields: a fixture may declare "volatile": ["accepts[*].extra.recentBlockhash", ...]
+— challenge fields that change by construction (clocks), not by seller action.
+When the byte compare fails AND the fixture declares volatile paths, both the
+stored and the live challenge are base64-decoded and the declared leaves removed
+from BOTH before an object compare; equality after masking counts as a match and
+is logged as volatile_masked. Decode failure falls back to the byte verdict
+(fail-closed: we never mask what we cannot parse). Discovered the hard way on
+stabletravel_airports: its solana leg mints recentBlockhash/lastValidBlockHeight
+per request, and the two-fetches-2s-apart rule is blind to fields that live ~60s,
+so the watch reported a seller drift about a clock daily since 2026-09-10.
+
 Drift semantics:
   challenge_match=False  -> the live endpoint no longer constructs the challenge
                             captured in the fixture (re-capture needed)
@@ -37,7 +48,7 @@ State: state.json (alert only when a route's signature changes = dedup).
 Log: watch.log. Alerts: Telegram + ~/monitoring/ALERTS.log.
 Excluded automatically: fixtures without "url", constructed ones, example.test hosts.
 """
-import json, hashlib, os, subprocess, sys, datetime, urllib.request, urllib.error
+import base64, json, hashlib, os, subprocess, sys, datetime, urllib.request, urllib.error
 
 REPO = os.path.expanduser("~/x402-endpoint-validator")
 sys.path.insert(0, REPO)
@@ -112,6 +123,63 @@ def expect_channel(fx):
 def body_payment_obj(headers, body_text):
     """Body-side PaymentRequired as the validator extracts it (None if there is none)."""
     return extract_payment_required(402, headers or {}, body_text or "").body_obj
+
+def _drop_path(obj, segments):
+    """Remove the leaf at segments from obj in place. Returns how many leaves were removed.
+
+    A segment is either a plain dict key ("extra"), a key with a concrete index
+    ("accepts[1]"), or a key fanned out over a whole list ("accepts[*]").
+    Missing keys/indices remove nothing — declaring a volatile path that the
+    challenge does not carry is not an error, it just masks nothing.
+    """
+    if not segments:
+        return 0
+    seg, rest = segments[0], segments[1:]
+    key, idx = seg, None
+    if seg.endswith("]") and "[" in seg:
+        key, bracket = seg[:seg.index("[")], seg[seg.index("[") + 1:-1]
+        idx = bracket  # "*" or a decimal index
+    if not isinstance(obj, dict) or key not in obj:
+        return 0
+    tgt = obj[key]
+    if idx is None:
+        if not rest:
+            del obj[key]
+            return 1
+        return _drop_path(tgt, rest)
+    if not isinstance(tgt, list):
+        return 0
+    if idx == "*":
+        if not rest:
+            # "accepts[*]" alone would mean deleting every element; that is a
+            # declaration error, not a mask — refuse by removing nothing.
+            return 0
+        return sum(_drop_path(el, rest) for el in tgt)
+    i = int(idx)
+    if i >= len(tgt):
+        return 0
+    if not rest:
+        tgt.pop(i)
+        return 1
+    return _drop_path(tgt[i], rest)
+
+def masked_challenge_equal(stored_hdr, live_hdr, volatile_paths):
+    """Byte-unequal challenges compared again with declared volatile leaves removed.
+
+    Returns (equal, masked_count) — or (False, 0) when either side does not
+    decode as base64 JSON (fail-closed: we never mask what we cannot parse).
+    """
+    try:
+        stored = json.loads(base64.b64decode(stored_hdr))
+        live = json.loads(base64.b64decode(live_hdr))
+    except Exception:
+        return False, 0
+    masked = 0
+    for path in volatile_paths:
+        segs = path.split(".")
+        masked += _drop_path(stored, list(segs))
+        _drop_path(live, list(segs))
+    return stored == live, masked
 
 def git(*args):
     return subprocess.run(["git", "-C", REPO] + list(args),
@@ -188,12 +256,19 @@ def main():
         if channel in BODY_CHANNELS:
             stored_obj = body_payment_obj(fx.get("headers"), stored_body)
             body_match = stored_obj is not None and stored_obj == body_payment_obj(hdrs, live_body)
+        challenge_match = bool(stored_hdr) and (live_hdr == stored_hdr)
+        volatile_masked = None
+        if stored_hdr and live_hdr and not challenge_match and fx.get("volatile"):
+            eq, n = masked_challenge_equal(stored_hdr, live_hdr, fx["volatile"])
+            if eq:
+                challenge_match, volatile_masked = True, n
         rec = {
             "fixture": path,
             "url": fx["url"],
             "live_status": st,
             "status_match": (st == exp_status),
-            "challenge_match": bool(stored_hdr) and (live_hdr == stored_hdr),
+            "challenge_match": challenge_match,
+            "volatile_masked": volatile_masked,
             "expect_channel": channel,
             "body_match": body_match,
             "capture_field": ("captured_at_utc" if "captured_at_utc" in fx
@@ -216,7 +291,7 @@ def main():
             # on either side alone, so neither check shadows the other
             if not stored_hdr:
                 log(f"{name}: no stored payment-required header, status-only check")
-            elif live_hdr != stored_hdr:
+            elif not rec["challenge_match"]:
                 alerts.append(f"CHALLENGE DRIFT {name}: stored {len(stored_hdr)}B vs live {len(live_hdr)}B "
                               f"(capture {rec['capture_field']}={rec['capture_value']})")
             if body_match is False:
@@ -227,7 +302,8 @@ def main():
                 and body_match is not False):
             matched += 1
         log(f"{name}: status={st} status_match={rec['status_match']} "
-            f"challenge_match={rec['challenge_match']} "
+            f"challenge_match={rec['challenge_match']}"
+            f"{'' if volatile_masked is None else f' (volatile_masked={volatile_masked})'} "
             f"body_match={'n/a' if body_match is None else body_match}")
 
     json.dump(state, open(STATE, "w"), indent=2)
