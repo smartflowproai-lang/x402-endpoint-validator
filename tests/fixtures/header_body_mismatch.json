@@ -1,5 +1,6 @@
 {
   "name": "header_body_mismatch",
+  "constructed": true,
   "url": "https://example.test/api/header-body-mismatch",
   "method": "GET",
   "status": 402,

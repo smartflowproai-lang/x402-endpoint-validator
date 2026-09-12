@@ -1,5 +1,6 @@
 {
   "name": "l402_www_authenticate_only",
+  "constructed": true,
   "url": "https://example.test/api/l402-www-authenticate-only",
   "method": "GET",
   "status": 402,

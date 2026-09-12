@@ -1,5 +1,6 @@
 {
   "name": "body_only_v1_legacy",
+  "constructed": true,
   "url": "https://example.test/api/body-only-v1-legacy",
   "method": "GET",
   "status": 402,

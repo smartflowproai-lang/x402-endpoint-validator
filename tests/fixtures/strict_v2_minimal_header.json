@@ -1,5 +1,6 @@
 {
   "name": "strict_v2_minimal_header",
+  "constructed": true,
   "url": "https://example.test/api/strict-v2-minimal-header",
   "method": "GET",
   "status": 402,
