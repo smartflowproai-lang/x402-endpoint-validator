@@ -1,5 +1,6 @@
 {
   "name": "web3identity_blockcount",
+  "proves": "GET, header channel; re-captured after the 2026-09-05 seller-side challenge rotation, clean since 2026-09-08",
   "url": "https://api.web3identity.com/api/bitcoin/blockcount",
   "method": "GET",
   "status": 402,

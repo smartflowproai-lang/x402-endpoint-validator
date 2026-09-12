@@ -1,5 +1,6 @@
 {
   "name": "apinow_buzzwords",
+  "proves": "GET, header-only challenge, channel=header, extraction passes, no failure class",
   "url": "https://apinow.fun/api/endpoints/apinowfun/buzzwords",
   "method": "GET",
   "status": 402,

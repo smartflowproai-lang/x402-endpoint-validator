@@ -1,5 +1,6 @@
 {
   "name": "terradeed_scrape",
+  "proves": "POST with request_body: the challenge depends on the request, so the input contract is part of the vector; header channel",
   "url": "https://api.terradeed.co.uk/scrape",
   "method": "POST",
   "status": 402,

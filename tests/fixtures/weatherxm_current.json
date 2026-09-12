@@ -1,5 +1,6 @@
 {
   "name": "weatherxm_current",
+  "proves": "GET, header channel",
   "url": "https://agent.weatherxm.com/api/current",
   "method": "GET",
   "status": 402,

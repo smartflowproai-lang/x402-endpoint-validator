@@ -1,6 +1,7 @@
 {
   "name": "body_only_v1_legacy",
   "constructed": true,
+  "proves": "challenge only in the body, v1 back-compat: channel=body, legacy_placement=true, passes",
   "url": "https://example.test/api/body-only-v1-legacy",
   "method": "GET",
   "status": 402,

@@ -1,6 +1,7 @@
 {
   "name": "strict_v2_minimal_header",
   "constructed": true,
+  "proves": "the minimal header that passes strict-v2: declares only expect_strict_v2, sets the profile's lower bound",
   "url": "https://example.test/api/strict-v2-minimal-header",
   "method": "GET",
   "status": 402,

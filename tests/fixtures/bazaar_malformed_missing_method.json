@@ -1,6 +1,7 @@
 {
   "name": "bazaar_malformed_missing_method",
   "constructed": true,
+  "proves": "bazaar extension with input missing its required method key: payment-required still passes, bazaar_ok=false, class bazaar_malformed",
   "note": "Synthetic negative fixture, not a merchant capture. Built to pin the failure mode where extensions.bazaar.info.input exists but omits the required 'method' key. No live endpoint audited so far has produced this shape; it exists purely to exercise check_bazaar_extension's error path.",
   "status": 402,
   "headers": {

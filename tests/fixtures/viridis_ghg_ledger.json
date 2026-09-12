@@ -1,5 +1,6 @@
 {
   "name": "viridis_ghg_ledger",
+  "proves": "POST with request_body, header channel; declares settled_flow_confirmed=false, an unpaid preflight only",
   "url": "https://mcp.viridisconservation.com/x402/ghg-ledger/calculate_inventory",
   "method": "POST",
   "request_body": {

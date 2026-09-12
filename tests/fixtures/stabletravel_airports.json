@@ -1,5 +1,6 @@
 {
   "name": "stabletravel_airports",
+  "proves": "GET, multi-leg challenge: eip155:8453 and solana legs in one accepts; header channel; carries declared volatile clock fields",
   "url": "https://stabletravel.dev/api/flightaware/airports",
   "method": "GET",
   "status": 402,

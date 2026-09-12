@@ -1,6 +1,7 @@
 {
   "name": "l402_www_authenticate_only",
   "constructed": true,
+  "proves": "402 with only a WWW-Authenticate header in L402 style: not x402, passed=false, channel=none, class l402_www_authenticate",
   "url": "https://example.test/api/l402-www-authenticate-only",
   "method": "GET",
   "status": 402,

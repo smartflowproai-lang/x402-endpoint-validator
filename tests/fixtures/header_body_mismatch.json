@@ -1,6 +1,7 @@
 {
   "name": "header_body_mismatch",
   "constructed": true,
+  "proves": "both channels present and disagreeing: extraction passes, compare_channels must return a non-empty divergence list",
   "url": "https://example.test/api/header-body-mismatch",
   "method": "GET",
   "status": 402,

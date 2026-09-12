@@ -1,5 +1,6 @@
 {
   "name": "hugen_address",
+  "proves": "GET, header channel, third independent implementation of the same challenge shape",
   "url": "https://defi.hugen.tokyo/defi/address",
   "method": "GET",
   "status": 402,
@@ -15,7 +16,7 @@
     "cf-ray": "a1daa541cd950d87-PDX",
     "alt-svc": "h3=\":443\"; ma=86400"
   },
-  "body": "{\"_notice\":\"Payment required ($0.01 USDC on Base). Sample response below.\",\"_alternatives\":{\"mcp\":{\"info\":\"If you support MCP, connect once and access 2,300+ APIs through 92 tools\",\"url\":\"https://mcp.hugen.tokyo/mcp\",\"transport\":\"streamable-http\"},\"sdk\":{\"info\":\"One-line Python access \u2014 no wallet, no setup\",\"install\":\"pip install x402-pay\",\"usage\":\"import x402_pay; r = x402_pay.get('https://defi.hugen.tokyo/defi/token?chain=base&address=0x...')\"},\"intel\":{\"info\":\"AI-synthesized risk analysis \u2014 aggregates 4+ sources, 0-100 risk scoring, actionable verdict. One $0.50 call replaces 4 API calls + LLM synthesis\",\"example\":\"https://intel.hugen.tokyo/intel/token-report?address=0xdac17f958d2ee523a2206206994597c13d831ec7&chain=base\"},\"whale\":{\"info\":\"Track whale wallets behind the tokens you audit \u2014 412K labeled Ethereum addresses, entity resolution, movement detection ($0.01-0.02)\",\"example\":\"https://whale.hugen.tokyo/whale/lookup?address=0x28c6c06298d514db089934071355e5743bf21d60\"}},\"is_malicious_address\":false,\"contract_address\":false}",
+  "body": "{\"_notice\":\"Payment required ($0.01 USDC on Base). Sample response below.\",\"_alternatives\":{\"mcp\":{\"info\":\"If you support MCP, connect once and access 2,300+ APIs through 92 tools\",\"url\":\"https://mcp.hugen.tokyo/mcp\",\"transport\":\"streamable-http\"},\"sdk\":{\"info\":\"One-line Python access — no wallet, no setup\",\"install\":\"pip install x402-pay\",\"usage\":\"import x402_pay; r = x402_pay.get('https://defi.hugen.tokyo/defi/token?chain=base&address=0x...')\"},\"intel\":{\"info\":\"AI-synthesized risk analysis — aggregates 4+ sources, 0-100 risk scoring, actionable verdict. One $0.50 call replaces 4 API calls + LLM synthesis\",\"example\":\"https://intel.hugen.tokyo/intel/token-report?address=0xdac17f958d2ee523a2206206994597c13d831ec7&chain=base\"},\"whale\":{\"info\":\"Track whale wallets behind the tokens you audit — 412K labeled Ethereum addresses, entity resolution, movement detection ($0.01-0.02)\",\"example\":\"https://whale.hugen.tokyo/whale/lookup?address=0x28c6c06298d514db089934071355e5743bf21d60\"}},\"is_malicious_address\":false,\"contract_address\":false}",
   "expect": {
     "passed": true,
     "channel": "header",

@@ -1,5 +1,6 @@
 {
   "name": "viridis_regulatory_radar",
+  "proves": "POST with request_body, header channel; the only vector with settled_flow_confirmed=true and a block number in provenance",
   "url": "https://mcp.viridisconservation.com/x402/regulatory-radar/scan_regulations",
   "method": "POST",
   "request_body": {
