@@ -71,12 +71,12 @@ def main():
         path = f"tests/fixtures/{fn}"
         fx = json.load(open(os.path.join(FIXTURES, fn)))
         vid = fn[:-5]
-        source = "simulated" if fx.get("constructed") else ("observed" if fx.get("url") else "simulated")
+        source = fx.get("source") or ("simulated" if fx.get("constructed") else ("observed" if fx.get("url") else "simulated"))
         cap, cap_note = captured_at(fx, path)
         if source == "simulated":
             cap, cap_note = "n/a", "constructed"
         w = watch.get(path)
-        if source == "simulated":
+        if source in ("simulated", "derived"):
             verified = "per push (CI replay)"
         elif w and w[1]:
             verified = w[0][:16] + "Z"
@@ -93,6 +93,7 @@ def main():
 
     n_obs = sum(1 for r in rows if r[2] == "observed")
     n_sim = sum(1 for r in rows if r[2] == "simulated")
+    n_der = sum(1 for r in rows if r[2] == "derived")
     head_sha = git("rev-parse", "--short", TAG + "^{commit}").strip() or git("rev-parse", "--short", "HEAD").strip()
     today = datetime.date.today().isoformat()
 
@@ -110,8 +111,13 @@ def main():
           f"daily unpaid preflight matched the stored challenge (the (claim, freshness) pair from the thread). "
           f"Volatile clock fields, where declared, are masked before the verdict.")
     print()
-    print(f"Distribution: **{n_obs} observed, {n_sim} simulated, 0 derived.** We contribute no `derived` "
-          f"vectors yet; if your eight families include transformations, you define that value in practice.")
+    if n_der:
+        print(f"Distribution: **{n_obs} observed, {n_sim} simulated, {n_der} derived.** Derived vectors follow "
+              f"the thread convention: captured_at is the transformation date (or TBD), verification is per push "
+              f"(CI replay), host_ref is n/a.")
+    else:
+        print(f"Distribution: **{n_obs} observed, {n_sim} simulated, 0 derived.** We contribute no `derived` "
+              f"vectors yet; if your eight families include transformations, you define that value in practice.")
     print()
     print("| id | proves | source | captured_at | last_verified_at | contributor | command@tag |")
     print("|---|---|---|---|---|---|---|")
