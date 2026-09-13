@@ -32,7 +32,7 @@ Out of the box, the Action runs **5 compliance checks**:
 
 ## Paid Tier (with `api-key`)
 
-Get an API key from [hypersub.xyz/s/smartflow-scorecard](https://hypersub.xyz/s/smartflow-scorecard) ($15-$4999/mo).
+Get an API key by emailing info@smartflowproai.com.
 
 Unlocks **enhanced intel per endpoint**:
 - **Wash detection** — flag operator farms self-routing payments
@@ -58,7 +58,7 @@ Output now includes `reputation_score`, `wash_flag`, `facilitator_mediated`, `on
 | `endpoints` | yes | — | Single URL, inline JSON array (`'["https://a/x","https://b/y"]'`), or a workspace-relative path to a YAML/JSON config file. |
 | `threshold-p95` | no | `1000` | P95 response time in milliseconds. Any endpoint above this fails the latency check. |
 | `tier` | no | `free` | `free` for public repos. `pro` unlocks webhooks, trend tracking, custom thresholds, private-repo support. |
-| `pro-license-key` | no | `''` | Required when `tier=pro`. Issued at smartflowproai.com/atlas. |
+| `pro-license-key` | no | `''` | Required when `tier=pro`. Issued on request: info@smartflowproai.com. |
 | `webhook-url` | no | `''` | Slack or Teams webhook for per-run notifications. Pro tier only. |
 | `report-path` | no | `x402-validator-report.json` | Where the JSON report lands inside the workspace. Upload it as an artifact if you want history. |
 | `fail-on` | no | `any` | `any` = fail on any endpoint that did not pass. `critical` = fail only on 402 payment-conformance defects. `manifest` = fail only on `/.well-known/x402` defects. `never` = report-only, never fails the workflow. Every mode is a subset of `endpoint.passed`. |
@@ -303,7 +303,7 @@ This Action is the conformance test. It speaks the spec, probes like a real agen
 
 **Free** — public-repo defaults. All five validation layers. Single-endpoint or matrix. JSON report. Use it forever, no key required.
 
-**Paid (Mapper API key)** — pass `api-key` to unlock enhanced per-endpoint intel: wash detection, reputation history, facilitator classification, on-chain 30d volume. Tiers run from Insider ($15/mo) up to Enterprise ($4,999/mo). Subscribe at [hypersub.xyz/s/smartflow-scorecard](https://hypersub.xyz/s/smartflow-scorecard).
+**Paid (Mapper API key)** — pass `api-key` to unlock enhanced per-endpoint intel: wash detection, reputation history, facilitator classification, on-chain 30d volume. Access by request: info@smartflowproai.com.
 
 You never need a key for normal CI conformance. The key exists for teams that want the underlying Mapper telemetry surfaced inline with their validation runs.
 
@@ -314,7 +314,7 @@ You never need a key for normal CI conformance. The key exists for teams that wa
 Built and maintained by **Tom Smart** ([@TomSmart_ai](https://twitter.com/TomSmart_ai)).
 
 - **Site:** [smartflowproai.com](https://smartflowproai.com)
-- **Mapper API:** [smartflowproai.com/catalog](https://smartflowproai.com/catalog) — live index of x402 endpoints across Base + Ethereum.
+- **Mapper API:** [api.smartflowproai.com/docs](https://api.smartflowproai.com/docs) — live index of x402 endpoints across Base + Ethereum.
 - **Substack:** [smartflowproai.substack.com](https://smartflowproai.substack.com) — weekly x402 telemetry and methodology notes.
 - **GitHub:** [github.com/smartflowproai-lang](https://github.com/smartflowproai-lang)
 
@@ -325,7 +325,7 @@ If you ship x402 endpoints, ping me on X. I keep a running list of endpoints tha
 ## Community + contributing
 
 - **Issues:** [github.com/smartflowproai-lang/x402-endpoint-validator/issues](https://github.com/smartflowproai-lang/x402-endpoint-validator/issues)
-- **Discord:** drop into the SmartFlow channel via [smartflowproai.com/discord](https://smartflowproai.com/discord) if you want async support
+
 - **PRs welcome:** see `CONTRIBUTING.md` for the test harness setup. New scheme support (beyond `exact`) is the top contribution area right now.
 
 If you find a real-world x402 endpoint that the validator gets wrong, open an issue with the URL and the response body — those bug reports are the most useful thing you can send.
