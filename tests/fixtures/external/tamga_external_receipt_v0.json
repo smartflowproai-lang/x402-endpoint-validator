@@ -1,0 +1,9 @@
+{
+  "id": "tamga_external_receipt_v0",
+  "proves": "third-party receipt binds through the labeled delivery-hash chain (receiptHash → receipt → delivery_hash → contentHash); label-disciplined fields accept the well-formed external receipt and RED every negative (md5 alg, extra field, uppercase rail, receipt-id without 0x)",
+  "source": "derived",
+  "captured_at": "2026-09-12",
+  "last_verified_at": "per push (CI replay)",
+  "contributor": "goun7",
+  "command": "`python3 tests/at018_m6_manifest_schema.sh` (AT-018 family: ok + 4 RED negatives in the acceptance suite) @ v0.2.3"
+}

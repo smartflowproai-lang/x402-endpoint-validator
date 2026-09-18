@@ -91,6 +91,20 @@ def main():
         rows.append((vid, proves, source, cap if cap == "n/a" or cap == "TBD" else cap,
                      cap_note, verified, contributor(path), cmd))
 
+    # Contributed rows (tests/fixtures/external/*.json): carried verbatim, one file
+    # per row, cells cut from the contributor's own vector files per the #3396
+    # convention. Not loaded by the pytest corpus — their verification command
+    # points at the contributor's suite, pinned to the contributor's tag.
+    external_dir = os.path.join(FIXTURES, "external")
+    if os.path.isdir(external_dir):
+        for fn in sorted(os.listdir(external_dir)):
+            if not fn.endswith(".json"):
+                continue
+            ex = json.load(open(os.path.join(external_dir, fn)))
+            rows.append((ex["id"], ex["proves"], ex["source"], ex["captured_at"],
+                         ex.get("captured_at_note", ""), ex["last_verified_at"],
+                         ex["contributor"], ex["command"]))
+
     n_obs = sum(1 for r in rows if r[2] == "observed")
     n_sim = sum(1 for r in rows if r[2] == "simulated")
     n_der = sum(1 for r in rows if r[2] == "derived")
