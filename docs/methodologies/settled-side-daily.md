@@ -13,12 +13,14 @@ carries its own figures.
 For each pair (catalog route, Base payout address) the file reports how many settled USDC
 transfer legs in the 0.0005-5 USDC band landed on that address in the 30 days up to T and were
 not labeled wash, and the block time of the latest such leg. That is all it measures. It is a
-read of on-chain settlement against a catalog snapshot, not a health score, not a liveness
+read of on-chain settlement against a catalog snapshot, not a quality score, not a liveness
 signal and not a revenue statement.
 
-One JSONL line per pair, eight keys in fixed order: `resource_url`, `pay_to`,
+One JSONL line per pair, ten keys in fixed order: `resource_url`, `pay_to`,
 `payto_route_count`, `settled_count_30d`, `last_settled_block_time`, `snapshot_date`, `band`,
-`methodology_url`. `payto_route_count` is how many distinct catalog routes have a Base leg
+`methodology_url`, `settled_count_30d_raw`, `labeled_count_30d`. The raw count covers the same
+address, window and band as `settled_count_30d` without the wash filter; `labeled_count_30d` is
+the difference. Files before schema rev 2 carry only the first eight. `payto_route_count` is how many distinct catalog routes have a Base leg
 pointing at the same payout address in the same snapshot.
 
 ## The clock and the window
@@ -49,8 +51,9 @@ pointing at the same payout address in the same snapshot.
   that nothing arrived. In the 2026-09-20 file, 309 lines on 148 payout addresses were zero.
   Of those, 35 lines (on 28 addresses) had no in-band settlement recorded in our ledger for
   the window; 274 lines (on 120 addresses) had in-band settlements that the wash rules
-  excluded in full. The file does not tell these two apart, and it does not carry a wash
-  versus clean split. Do not render a zero as "never paid".
+  excluded in full. From schema rev 2 the file tells them apart: `settled_count_30d_raw` is
+  zero on the first kind and equals `labeled_count_30d` on the second. Do not render a zero as
+  "never paid".
 - The counts are a small residue. For scale: in the 2026-09-20 window, 1,182,999 of the
   1,240,174 in-band settlements received by the file's payout addresses (95.4%) carried a wash
   label. The counts are the remaining 4.6%, so small changes in classification move them a
@@ -69,11 +72,17 @@ pointing at the same payout address in the same snapshot.
   pointing at this address during the window, the count includes settlements from before it
   did, and if it moved to a new address, the old address's traffic is not carried over.
 - The counter is a floor for dual-rail sellers. A seller that also settles on Solana or another network shows only its Base traffic here; one dual-rail seller's own books put more than half of its settlements outside Base.
-- The counter is a floor for sellers with busy automated buyers. Two of the rules label exactly the pattern of an agent buying on a schedule: very small payments from a payer that sends a great many transfers in a day, and the same amount from the same payer repeated within a short burst. One seller whose payout address, by its own books, receives nothing but x402 settlements had more than four fifths of its in-band settlements labeled. From the next file, every line also carries the in-band count before the filter, so the labeled share of an address is visible next to the count.
+- The counter is a floor for sellers with busy automated buyers. Two of the rules label exactly the pattern of an agent buying on a schedule: very small payments from a payer that sends a great many transfers in a day, and the same amount from the same payer repeated within a short burst. One seller whose payout address, by its own books, receives nothing but x402 settlements had more than four fifths of its in-band settlements labeled. Every line now carries the in-band count before the filter next to the count after it, and its labeled part, so the labeled share of an address is visible next to the count.
+- The raw count is context, not a corrected count. `settled_count_30d_raw` is every in-band settlement to the address before the wash filter, including patterns the rules exist to remove and transfers unrelated to x402. It is computed in the same pass over the same rows as the count, so `settled_count_30d_raw - labeled_count_30d = settled_count_30d` on every line. It does not depend on labels; `labeled_count_30d` does, and for a past date it can only grow.
 - The counter is a floor. Settlements outside the band are invisible, and the ledger keeps at
   most one transfer per transaction hash, so a transaction carrying several in-band transfers
   is recorded for one of them only. Inside the band it counts every transfer, so it can
   include activity unrelated to x402.
+- The floor keeps dust out. The lower edge of the band, 0.0005 USDC, is applied when a transfer is recorded, so nothing smaller enters the ledger or either count. It defines the micropayment band and was not designed as a defence, but it also excludes dust sent in bulk at almost no cost, including the tiny transfers from lookalike addresses used in address poisoning: a transfer of 0.00001 USDC never enters the ledger, whatever its purpose. Dust at or above the floor is recorded like any other in-band transfer and counts unless a wash rule labels it.
+- The clean measure depends on its unit. The rules label single settlements, not channels (one payer paying one payout address); per channel, a settlement would be clean only if nothing in its channel carried a label. In the 2026-09-20 file, 32,072 of the 57,175 counted settlements (56.1%, each payout address counted once) sit in channels with at least one labeled settlement, and by value about 44% of what the counted settlements carried. Across the whole in-band ledger (every recipient, not only x402) over the seven days from `2026-09-13T04:00Z` to `2026-09-20T04:00Z`, the same measure gives 31.11% of unlabeled settlements and 20.27% of their value, on 8,569 channels. Count and value give different answers, so the sensitivity is stated in both; see the fourth way to break this measurement for why the file stays per settlement.
+- Settled is not the same as having customers. A non-zero count says who was paid, not by whom or why. Some paying addresses pay a great many catalog routes a few times each, the pattern of a quality probe, a crawler, a benchmark or an agent exploring the catalog, and the ledger cannot tell them apart from customers. Seven such paying addresses (about five operators, judged by the overlap of the recipients they pay) were picked on a separate 28 day window (`2026-08-24T04:00Z` to `2026-09-21T04:00Z`) as the payers reaching the most distinct recipients with repeated, facilitator-mediated, unlabeled settlements; on that window they paid 776 of the 1,516 catalog payout addresses that received anything in band (51%). In the 2026-09-20 file, 569 of the 1,134 payout addresses with a non-zero count (50.2%) received at least one counted settlement from them, and for 18 payout addresses they are the whole count; they carry 3,280 of the 57,175 counted settlements (5.7%). Base rate: in the file's window, 8,937 distinct paying addresses paid the file's payout addresses; the median one paid 1 of them, the 99th percentile 19, and each of the seven between 90 and 597. Thirty reached 50 or more and only seven were examined, so this is a floor on how much of the file such payers touch.
+- Requests are not transfers. A buyer's client that signs a second payment when it retries a request can produce two real settlements for one request. A seller's books count requests; the chain counts transfers. Both numbers are true and answer different questions. To reconcile the file with a seller's own records, compare them with `settled_count_30d_raw`, not with the count after the filter.
+- A facilitator's response is not proof of settlement. A facilitator's settle response names a transaction hash; the settlement is the transfer on chain, and only the transfer is recorded. To check a hash, call `eth_getTransactionReceipt` on a Base node: `null` means no mined transaction with that hash on Base (another network, dropped or replaced, or not mined yet); `status` `0x0` means it reverted and nothing moved; `status` `0x1` means it executed, and its `logs` should then hold a `Transfer` event from the USDC contract to the payout address for the expected amount. A hash that fails this check is in neither count.
 - The ledger reads the chain head without waiting for finality and does not remove transfers
   dropped by a reorganisation. On Base such reorganisations are rare and shallow, so we treat
   the effect as negligible, but a counted settlement is not proof of a finalized one.
@@ -97,7 +106,9 @@ pointing at the same payout address in the same snapshot.
 3. Labels move counts in one direction. Classification keeps running after a file ships. In
    routine operation labels are only ever added, never removed, and later history can add
    them to settlements inside an old window. Counts for a past date can therefore only move
-   down; a manual correction that raises a past count would ship with a note.
+   down; a manual correction that raises a past count would ship with a note. The raw count is
+   unaffected by labeling; only the split between `settled_count_30d` and `labeled_count_30d`
+   moves.
 4. Some wash rules read the ingest clock. The burst test and the per day activity counts used
    by the rules time payments by our ingest clock, not by block time. Because that clock
    batches hourly, payments spread over much of an hour on chain can be judged one burst and
@@ -209,6 +220,10 @@ info@smartflowproai.com. check the numbers. especially mine.
 
 ## Revision history
 
+- **v3.2** (schema rev 2)
+  - Schema rev 2: `settled_count_30d_raw` and `labeled_count_30d` appended to every line, after the eight existing keys. Zero lines can now be told apart: nothing in band vs everything labeled. `last_settled_block_time` unchanged (counted settlements only). Earlier files are not reissued.
+  - New points under "Reading the numbers correctly": the raw count is context, not a corrected count; the floor keeps dust out; the clean measure depends on its unit (per settlement vs per channel, in count and in value); settled is not the same as having customers; requests are not transfers; a facilitator's response is not proof of settlement, with a receipt check anyone can run.
+  - Opening paragraph: one term reworded ("not a quality score"), meaning unchanged.
 - **v3** (2026-09-23)
   - Stated as a floor for dual-rail sellers and for sellers with busy automated buyers, with a partner's own books as the worked example; the in-band count before the filter announced for the next file.
   - All figures re-dated to the file of 2026-09-20 and marked as a worked example; later files
