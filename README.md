@@ -171,6 +171,8 @@ Capture-time metadata went through three field generations, oldest first:
 
 stabletravel moved to the third generation on 2026-08-31, re-captured after the first full-corpus watch run flagged a rotated solana-leg `feePayer` — see `watch-reports/2026-08-31-corpus.md`.
 
+Contributed rows whose claim needs a chain reader (`tests/fixtures/external/`, `source: requires_chain_read`, class 3 in `docs/corpus-index.md`) are outside the daily watch. Their freshness is (block, reader, date): the vector file records the settlement chain, block and reference, the contributor's tool and version, and each read as `reader` (the node URL), `read_at` and `read_result` (`found`, `not_found` or `pruned`). `last_verified_at` is the latest of those reads with its reader named. One read proves the settlement was present on that reader on that date, not that it will stay readable, and a read without `reader` or `read_at` makes the generator refuse the row.
+
 ## Usage examples
 
 ### Basic — validate one endpoint on push

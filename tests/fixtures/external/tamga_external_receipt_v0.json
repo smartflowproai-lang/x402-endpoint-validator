@@ -5,5 +5,5 @@
   "captured_at": "2026-09-12",
   "last_verified_at": "per push (CI replay)",
   "contributor": "goun7",
-  "command": "`python3 tests/at018_m6_manifest_schema.sh` (AT-018 family: ok + 4 RED negatives in the acceptance suite) @ v0.2.3"
+  "command": "`bash tests/at018_m6_manifest_schema.sh` (AT-018 family: ok + 4 RED negatives in the acceptance suite) @ v0.2.3"
 }
