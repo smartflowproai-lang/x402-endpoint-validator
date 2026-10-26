@@ -15,7 +15,7 @@ import json, os, re, subprocess, sys, datetime
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIXTURES = os.path.join(REPO, "tests", "fixtures")
-WATCH_STATE = os.path.expanduser("~/corpus-watch/state.json")
+WATCH_STATE = os.path.join(os.path.expanduser(os.environ.get("CORPUS_WATCH_DIR", "~/corpus-watch")), "state.json")
 TAG = sys.argv[1] if len(sys.argv) > 1 else "v1.5.1"
 
 # contributor = GitHub handle of the author of the vector's first commit.
@@ -63,6 +63,29 @@ def watch_verified():
                                    rec.get("volatile_masked"))
     return out
 
+def watch_bindings():
+    """binding.name -> the latest dns-txt re-read from the corpus-watch state."""
+    if not os.path.exists(WATCH_STATE):
+        return {}
+    return json.load(open(WATCH_STATE)).get("bindings") or {}
+
+def binding_cell(ex, rec):
+    """(last_verified_at, proves) for a row bound by a dns-txt record. The fixture
+    keeps its capture-time cell; the watch state, when it has re-read the record,
+    decides whether the row may still say bound."""
+    if not rec:
+        return ex["last_verified_at"], ex["proves"]
+    result, at = rec.get("binding_reread_result"), (rec.get("binding_reread_at") or "?")[:16] + "Z"
+    if result == "same":
+        via = ", ".join(r.rsplit(" ", 1)[0] for r in rec.get("binding_resolvers", []))
+        return f"bound (record re-read {at} via {via}: same)", ex["proves"]
+    since = (rec.get("binding_result_since") or rec.get("binding_reread_at") or "?")[:16] + "Z"
+    cell = {"changed": f"binding_changed since {since}",
+            "nxdomain": f"record missing {at}"}.get(result, f"re-read failed {at}")
+    read_on = ex["binding"].get("read_at", "?")[:10]
+    proves = ex["proves"].replace("is bound to", f"was bound on {read_on} to")
+    return cell, proves + "; the daily re-read does not confirm the binding now"
+
 READ_RESULTS = ("found", "not_found", "pruned")
 FINALITY = ("finalized", "not_yet_finalized", "unknown")
 CHAIN_READ_FIELDS = ("settlement_chain", "settlement_block", "settlement_ref", "tool", "reads")
@@ -107,16 +130,23 @@ def chain_read_verified(ex):
             f"hash {' / '.join(hashes)}, tx {ex['settlement_ref']}, via {', '.join(methods)}, "
             f"finality: {finality}, read from node: {readers}")
 
-def external_row(ex):
-    verified = chain_read_verified(ex) if ex["source"] == "requires_chain_read" else ex["last_verified_at"]
+def external_row(ex, bindings=None):
+    proves = ex["proves"]
+    if ex["source"] == "requires_chain_read":
+        verified = chain_read_verified(ex)
+    elif (ex.get("binding") or {}).get("method") == "dns-txt":
+        verified, proves = binding_cell(ex, (bindings or {}).get(ex["binding"].get("name")))
+    else:
+        verified = ex["last_verified_at"]
     command = ex["command"]
     for nr in ex.get("tool_not_run", []):
         command += f"; {nr}"
-    return (ex["id"], ex["proves"], ex["source"], ex["captured_at"],
+    return (ex["id"], proves, ex["source"], ex["captured_at"],
             ex.get("captured_at_note", ""), verified, ex["contributor"], command)
 
 def main():
     watch = watch_verified()
+    bindings = watch_bindings()
     rows = []
     for fn in sorted(os.listdir(FIXTURES)):
         if not fn.endswith(".json"):
@@ -155,7 +185,7 @@ def main():
             if not fn.endswith(".json"):
                 continue
             ex = json.load(open(os.path.join(external_dir, fn)))
-            rows.append(external_row(ex))
+            rows.append(external_row(ex, bindings))
             if ex.get("source") == "observed":
                 ext_obs.append((ex.get("id", fn), (ex.get("captured_at") or "")[:10]))
 

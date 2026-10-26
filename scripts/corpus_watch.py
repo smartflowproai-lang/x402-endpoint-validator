@@ -47,16 +47,30 @@ Drift semantics:
 State: state.json (alert only when a route's signature changes = dedup).
 Log: watch.log. Alerts: Telegram + ~/monitoring/ALERTS.log.
 Excluded automatically: fixtures without "url", constructed ones, example.test hosts.
+
+DNS bindings (holistis, x402#3396): contributed rows under tests/fixtures/external/
+are not preflighted, but a row whose signer is bound to the operator domain by a
+TXT record (binding.method == "dns-txt") makes a claim that can silently expire:
+the operator can rotate or drop the record. reread_dns_bindings() reads that
+record daily on two resolvers (system + 1.1.1.1) and compares the did:pkh
+controller address with the row's recovered_signer. Result per binding.name:
+same | changed | nxdomain | error, fail-closed (same only when every resolver
+says same). It goes to state.json under "bindings"; the fixture file is never
+touched (the row is a time capsule, the state is the watch). ALERTS.log gets a
+line on changed/nxdomain, only when the result differs from the previous run.
+
+CORPUS_WATCH_DIR / CORPUS_WATCH_ALERTS move state+log / the alert file (tests,
+dry runs); the defaults are the production paths.
 """
-import base64, json, hashlib, os, subprocess, sys, datetime, urllib.request, urllib.error
+import base64, json, hashlib, os, re, subprocess, sys, datetime, urllib.request, urllib.error
 
 REPO = os.path.expanduser("~/x402-endpoint-validator")
 sys.path.insert(0, REPO)
 from payment_required import extract_payment_required  # noqa: E402  (needs REPO on path)
-BASE = os.path.expanduser("~/corpus-watch")
+BASE = os.path.expanduser(os.environ.get("CORPUS_WATCH_DIR", "~/corpus-watch"))
 STATE = os.path.join(BASE, "state.json")
 LOG = os.path.join(BASE, "watch.log")
-ALERTS = os.path.expanduser("~/monitoring/ALERTS.log")
+ALERTS = os.path.expanduser(os.environ.get("CORPUS_WATCH_ALERTS", "~/monitoring/ALERTS.log"))
 UA = "SmartFlow-corpus-watch/1.0 (+https://github.com/smartflowproai-lang/x402-endpoint-validator)"
 TIMEOUT = 20
 EXCLUDED_HOSTS = ("example.test",)
@@ -212,6 +226,96 @@ def live_fixtures(paths):
             continue
         yield path, fx
 
+# The second resolver is fixed so a poisoned or stale system cache cannot be
+# the only witness; "system" means whatever /etc/resolv.conf points at.
+DNS_RESOLVERS = ("system", "1.1.1.1")
+DNS_TIMEOUT = 10
+CONTROLLER_RE = re.compile(r"controller=did:pkh:eip155:1:(0x[0-9a-fA-F]{40})")
+
+def dig_txt(name, resolver):
+    """One TXT read via dig. Returns (status, [record strings]) where status is
+    ok | nxdomain | nodata | error; a TXT split into several quoted chunks is joined."""
+    cmd = ["dig", "+time=5", "+tries=1", "+noall", "+comments", "+answer", "TXT", name]
+    if resolver != "system":
+        cmd.append("@" + resolver)
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=DNS_TIMEOUT)
+    except Exception as e:
+        return "error", [f"{type(e).__name__}"]
+    m = re.search(r"status: ([A-Z]+)", p.stdout)
+    if p.returncode != 0 or not m:
+        return "error", [(p.stderr or p.stdout).strip()[:120]]
+    if m.group(1) == "NXDOMAIN":
+        return "nxdomain", []
+    if m.group(1) != "NOERROR":
+        return "error", [m.group(1)]
+    records = []
+    for line in p.stdout.splitlines():
+        if line.startswith(";") or not line.strip():
+            continue
+        parts = line.split(None, 4)
+        if len(parts) == 5 and parts[3] == "TXT":
+            records.append("".join(re.findall(r'"((?:[^"\\]|\\.)*)"', parts[4])))
+    return ("ok", records) if records else ("nodata", [])
+
+def classify_binding(reads, signer):
+    """Per-resolver reads -> one result. Fail-closed: changed > nxdomain > error > same."""
+    per = []
+    for status, records in reads:
+        if status in ("nxdomain", "nodata"):
+            per.append("nxdomain")
+        elif status == "error":
+            per.append("error")
+        else:
+            ctrls = {a.lower() for r in records for a in CONTROLLER_RE.findall(r)}
+            per.append("same" if signer.lower() in ctrls else "changed")
+    for res in ("changed", "nxdomain", "error"):
+        if res in per:
+            return res
+    return "same"
+
+def external_fixtures():
+    """Every tests/fixtures/external/*.json on origin/main (same source as live_fixtures)."""
+    ls = git("ls-tree", "--name-only", "origin/main", "tests/fixtures/external/")
+    for path in (p for p in ls.stdout.split() if p.endswith(".json")):
+        show = git("show", f"origin/main:{path}")
+        try:
+            yield path, json.loads(show.stdout)
+        except json.JSONDecodeError:
+            log(f"WARN: {path} is not valid json on origin/main")
+
+def reread_dns_bindings(fixtures, prev_bindings=None, resolve=dig_txt, alerts_path=None):
+    """Re-read the dns-txt controller binding of each external row. Returns
+    {binding.name: record} for the state; never writes to a fixture."""
+    prev_bindings = prev_bindings or {}
+    alerts_path = alerts_path or ALERTS
+    out = {}
+    for path, fx in fixtures:
+        b = fx.get("binding") or {}
+        if b.get("method") != "dns-txt" or not b.get("name"):
+            continue
+        name, signer = b["name"], fx.get("recovered_signer") or ""
+        reads = [resolve(name, r) for r in DNS_RESOLVERS]
+        result = classify_binding(reads, signer) if signer else "error"
+        at = now()
+        seen = sorted({r for st, recs in reads if st == "ok" for r in recs})
+        before = prev_bindings.get(name, {})
+        since = (before.get("binding_result_since") or at
+                 if before.get("binding_reread_result") == result else at)
+        out[name] = {
+            "fixture": path,
+            "binding_reread_at": at,
+            "binding_reread_result": result,
+            "binding_record_seen": seen,
+            "binding_resolvers": [f"{r} {st}" for r, (st, _) in zip(DNS_RESOLVERS, reads)],
+            "binding_result_since": since,
+        }
+        log(f"binding {name}: {result} ({', '.join(out[name]['binding_resolvers'])})")
+        if result in ("changed", "nxdomain") and before.get("binding_reread_result") != result:
+            with open(alerts_path, "a") as f:
+                f.write(f"[{at}] UWAGA corpus-watch: binding {name} {result}\n")
+    return out
+
 def main():
     os.makedirs(BASE, exist_ok=True)
     f = git("fetch", "origin", "main", "-q")
@@ -306,6 +410,7 @@ def main():
             f"{'' if volatile_masked is None else f' (volatile_masked={volatile_masked})'} "
             f"body_match={'n/a' if body_match is None else body_match}")
 
+    state["bindings"] = reread_dns_bindings(external_fixtures(), prev.get("bindings"))
     json.dump(state, open(STATE, "w"), indent=2)
     total = len(state["routes"])
     log(f"run done: {matched}/{total} fully matched, {len(alerts)} finding(s)")
