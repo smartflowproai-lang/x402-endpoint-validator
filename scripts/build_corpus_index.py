@@ -93,7 +93,7 @@ def chain_read_verified(ex):
     methods = sorted({rd.get("method") or "method not recorded" for rd in latest})
     readers = ", ".join(f"{re.sub(r'^https?://', '', rd['reader'])} {rd['read_result']}" for rd in latest)
     return (f"{last[:16]}Z, block {ex['settlement_block']} on {ex['settlement_chain']}, "
-            f"hash {' / '.join(hashes)}, via {', '.join(methods)}, read from node: {readers}")
+            f"hash {' / '.join(hashes)}, tx {ex['settlement_ref']}, via {', '.join(methods)}, read from node: {readers}")
 
 def external_row(ex):
     verified = chain_read_verified(ex) if ex["source"] == "requires_chain_read" else ex["last_verified_at"]

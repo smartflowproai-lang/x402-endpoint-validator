@@ -70,6 +70,8 @@ def test_cell_shows_full_block_hash_and_read_method():
     assert len(block_hash) == 66
     assert f"block 48209372 on eip155:84532, hash {block_hash}," in verified
     assert "via eth_getTransactionReceipt" in verified
+    assert f"tx {ROW['settlement_ref']}," in verified
+    assert len(ROW['settlement_ref']) == 66
 
 
 def test_settlement_block_hash_matches_latest_read():
