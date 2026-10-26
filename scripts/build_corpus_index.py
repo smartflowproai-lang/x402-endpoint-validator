@@ -64,6 +64,7 @@ def watch_verified():
     return out
 
 READ_RESULTS = ("found", "not_found", "pruned")
+FINALITY = ("finalized", "not_yet_finalized", "unknown")
 CHAIN_READ_FIELDS = ("settlement_chain", "settlement_block", "settlement_ref", "tool", "reads")
 
 def chain_read_verified(ex):
@@ -80,6 +81,8 @@ def chain_read_verified(ex):
                 raise SystemExit(f"{rid}: read {i} has no {k}")
         if rd["read_result"] not in READ_RESULTS:
             raise SystemExit(f"{rid}: read {i} read_result {rd['read_result']!r} not in {READ_RESULTS}")
+        if "finality" in rd and rd["finality"] not in FINALITY:
+            raise SystemExit(f"{rid}: read {i} finality {rd['finality']!r} not in {FINALITY}")
     last = max(rd["read_at"] for rd in ex["reads"])
     latest = [rd for rd in ex["reads"] if rd["read_at"][:16] == last[:16]]
     # The block number alone does not pin the block on a chain that can reorg;
@@ -91,9 +94,18 @@ def chain_read_verified(ex):
     if ex.get("settlement_block_hash") and hashes != [ex["settlement_block_hash"]]:
         raise SystemExit(f"{rid}: settlement_block_hash differs from the block_hash of the latest read")
     methods = sorted({rd.get("method") or "method not recorded" for rd in latest})
-    readers = ", ".join(f"{re.sub(r'^https?://', '', rd['reader'])} {rd['read_result']}" for rd in latest)
+    host = lambda rd: re.sub(r'^https?://', '', rd['reader'])
+    readers = ", ".join(f"{host(rd)} {rd['read_result']}" for rd in latest)
+    # Finality is the reader's view of its own finalized head, not proof beyond that node;
+    # older reads without the field are allowed and say so.
+    finality = ", ".join(
+        f"{rd['finality']} (finalized head {rd.get('finalized_head', 'not given')} on {host(rd)})"
+        if "finality" in rd else f"not read on {host(rd)}" for rd in latest)
+    if not any("finality" in rd for rd in latest):
+        finality = "not read"
     return (f"{last[:16]}Z, block {ex['settlement_block']} on {ex['settlement_chain']}, "
-            f"hash {' / '.join(hashes)}, tx {ex['settlement_ref']}, via {', '.join(methods)}, read from node: {readers}")
+            f"hash {' / '.join(hashes)}, tx {ex['settlement_ref']}, via {', '.join(methods)}, "
+            f"finality: {finality}, read from node: {readers}")
 
 def external_row(ex):
     verified = chain_read_verified(ex) if ex["source"] == "requires_chain_read" else ex["last_verified_at"]
@@ -171,7 +183,8 @@ def main():
               f"these rows `last_verified_at` is the last read of the settlement from a node, with the reader "
               f"named, not the unpaid preflight; a row without reader or read date is refused by the generator. "
               f"The cell gives the block hash the latest read saw, in full, next to the block number, and a "
-              f"latest read without a block hash is refused. They are not in the daily watch.")
+              f"latest read without a block hash is refused. Finality, where read, is the reader's own view of "
+              f"its finalized head, not proof beyond that node. They are not in the daily watch.")
         print()
     chain_part = f", {n_chain} requires_chain_read" if n_chain else ""
     if n_der:

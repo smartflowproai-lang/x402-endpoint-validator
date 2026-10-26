@@ -56,6 +56,32 @@
       "status": "0x1",
       "logs": 2,
       "reader_head": 50446739
+    },
+    {
+      "reader": "https://sepolia.base.org",
+      "read_at": "2026-10-26T11:41:03Z",
+      "method": "eth_getTransactionReceipt",
+      "read_result": "found",
+      "block": 48209372,
+      "block_hash": "0x71211e03b98a6402cda2bb4e3e0e4adcdb248d2dc133f2656ed9c07ae8b5bd24",
+      "status": "0x1",
+      "logs": 2,
+      "reader_head": 50464975,
+      "finality": "finalized",
+      "finalized_head": 50459990
+    },
+    {
+      "reader": "https://base-sepolia-rpc.publicnode.com",
+      "read_at": "2026-10-26T11:41:03Z",
+      "method": "eth_getTransactionReceipt",
+      "read_result": "found",
+      "block": 48209372,
+      "block_hash": "0x71211e03b98a6402cda2bb4e3e0e4adcdb248d2dc133f2656ed9c07ae8b5bd24",
+      "status": "0x1",
+      "logs": 2,
+      "reader_head": 50464976,
+      "finality": "finalized",
+      "finalized_head": 50458108
     }
   ]
 }

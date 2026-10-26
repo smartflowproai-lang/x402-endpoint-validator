@@ -1,0 +1,50 @@
+{
+  "id": "tokenizen_signed_offer_v0",
+  "proves": "an unpaid POST answers 402 with an offer-receipt extension carrying an EIP-712 signed offer whose payload matches accepts[acceptIndex] and resource.url; the signer can be recovered without paying (recovery names a key, it does not by itself bind that key to the operator)",
+  "source": "observed",
+  "url": "https://x402.tokenizen.nl/api/bug-intel-quick",
+  "method": "POST",
+  "request": {
+    "content_type": "application/json",
+    "body": "{}"
+  },
+  "captured_at": "2026-10-26T11:41:12Z",
+  "captured_at_note": "one unpaid POST from the VPS; PAYMENT-REQUIRED header and body decoded to the same JSON",
+  "last_verified_at": "2026-10-26T11:41Z (single unpaid read, not in the daily watch)",
+  "status": 402,
+  "x402Version": 2,
+  "extensions_present": [
+    "bazaar",
+    "offer-receipt",
+    "piprail"
+  ],
+  "offer": {
+    "format": "eip712",
+    "acceptIndex": 0,
+    "payload": {
+      "version": 1,
+      "resourceUrl": "https://x402.tokenizen.nl/api/bug-intel-quick",
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0x015Eb036560216B3051339061FF68A207E0fe88f",
+      "amount": "1000000",
+      "validUntil": 1793018472
+    },
+    "signature": "0x12daed293c37596974c144458abae3cfeb6a1199b7f845658f71487f6faf26c718a8b4ce0739d2cf7d9e29a979892f748b71694369f1f6b2fb0b2257b13213ad1c"
+  },
+  "eip712": {
+    "domain": {
+      "name": "x402 offer",
+      "version": "1",
+      "chainId": 1
+    },
+    "primaryType": "Offer",
+    "types_source": "OFFER_TYPES and createOfferDomain in @x402/extensions@2.9.0 offer-receipt (the 402 carries no domain or types)"
+  },
+  "signature_check": "recovered",
+  "recovered_signer": "0xf30b0706E78b3166745E6a2f351992321088058f",
+  "signature_check_note": "eth_account 0.13.7 encode_typed_data + recover_message; cross-checked with verifyOfferSignatureEIP712 from @x402/extensions@2.9.0 (same address); the recovered address is not the payTo and the 402 names no expected signer, so the check shows a well-formed signature by that key, not who holds it",
+  "contributor": "holistis",
+  "command": "`npx -y agent-receipt-verify https://x402.tokenizen.nl/api/bug-intel-quick` @ not run"
+}
