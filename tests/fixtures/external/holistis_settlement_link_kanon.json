@@ -11,6 +11,7 @@
   "receipt": "examples/receipt-live-base-sepolia.json in agent-receipt-verify@0.2.12 (the file carries no settlement hash by design; the tool has to find it)",
   "settlement_chain": "eip155:84532",
   "settlement_block": 48209372,
+  "settlement_block_hash": "0x71211e03b98a6402cda2bb4e3e0e4adcdb248d2dc133f2656ed9c07ae8b5bd24",
   "settlement_ref": "0xed87b09bfb20a8c8b69908e163fcea6432d193d389640c0465afcb5561dfeb30",
   "settlement_ref_origin": "printed by agent-receipt-verify@0.2.12 link on 2026-10-24T19:17Z (reader: rpc node, sepolia.base.org and base-sepolia-rpc.publicnode.com)",
   "reads": [
@@ -33,6 +34,28 @@
       "status": "0x1",
       "logs": 2,
       "reader_head": 50145502
+    },
+    {
+      "reader": "https://sepolia.base.org",
+      "read_at": "2026-10-26T10:40:16Z",
+      "method": "eth_getTransactionReceipt",
+      "read_result": "found",
+      "block": 48209372,
+      "block_hash": "0x71211e03b98a6402cda2bb4e3e0e4adcdb248d2dc133f2656ed9c07ae8b5bd24",
+      "status": "0x1",
+      "logs": 2,
+      "reader_head": 50446738
+    },
+    {
+      "reader": "https://base-sepolia-rpc.publicnode.com",
+      "read_at": "2026-10-26T10:40:16Z",
+      "method": "eth_getTransactionReceipt",
+      "read_result": "found",
+      "block": 48209372,
+      "block_hash": "0x71211e03b98a6402cda2bb4e3e0e4adcdb248d2dc133f2656ed9c07ae8b5bd24",
+      "status": "0x1",
+      "logs": 2,
+      "reader_head": 50446739
     }
   ]
 }
