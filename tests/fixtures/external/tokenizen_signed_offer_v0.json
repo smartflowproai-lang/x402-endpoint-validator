@@ -1,6 +1,6 @@
 {
   "id": "tokenizen_signed_offer_v0",
-  "proves": "an unpaid POST answers 402 with an offer-receipt extension carrying an EIP-712 signed offer whose payload matches accepts[acceptIndex] and resource.url; the signer can be recovered without paying (recovery names a key, it does not by itself bind that key to the operator)",
+  "proves": "an unpaid POST answers 402 with an offer-receipt extension carrying an EIP-712 signed offer whose payload matches accepts[acceptIndex] and resource.url; the signer can be recovered without paying and is bound to the operator domain by the _controllers TXT record (section 4.5.1), read on 2026-10-26",
   "source": "observed",
   "url": "https://x402.tokenizen.nl/api/bug-intel-quick",
   "method": "POST",
@@ -10,7 +10,7 @@
   },
   "captured_at": "2026-10-26T11:41:12Z",
   "captured_at_note": "one unpaid POST from the VPS; PAYMENT-REQUIRED header and body decoded to the same JSON",
-  "last_verified_at": "2026-10-26T11:41Z (single unpaid read, not in the daily watch)",
+  "last_verified_at": "2026-10-26T12:38Z (unpaid read 11:41Z, controller record read 12:38Z; not in the daily watch)",
   "status": 402,
   "x402Version": 2,
   "extensions_present": [
@@ -42,9 +42,24 @@
     "primaryType": "Offer",
     "types_source": "OFFER_TYPES and createOfferDomain in @x402/extensions@2.9.0 offer-receipt (the 402 carries no domain or types)"
   },
-  "signature_check": "recovered",
+  "signature_check": "bound",
   "recovered_signer": "0xf30b0706E78b3166745E6a2f351992321088058f",
-  "signature_check_note": "eth_account 0.13.7 encode_typed_data + recover_message; cross-checked with verifyOfferSignatureEIP712 from @x402/extensions@2.9.0 (same address); the recovered address is not the payTo and the 402 names no expected signer, so the check shows a well-formed signature by that key, not who holds it",
+  "signature_check_note": "eth_account 0.13.7 encode_typed_data + recover_message; cross-checked with verifyOfferSignatureEIP712 from @x402/extensions@2.9.0 (same address); the recovered address is not the payTo and the 402 names no expected signer, so the check shows a well-formed signature by that key, not who holds it 2026-10-26T12:38Z: the TXT record at _controllers.x402.tokenizen.nl names a controller did:pkh on eip155:1 equal to the recovered signer, identical on four resolvers, so the key is bound to the operator domain (not only recovered).",
   "contributor": "holistis",
-  "command": "`npx -y agent-receipt-verify https://x402.tokenizen.nl/api/bug-intel-quick` @ not run"
+  "command": "`npx -y agent-receipt-verify https://x402.tokenizen.nl/api/bug-intel-quick` @ not run",
+  "binding": {
+    "method": "dns-txt",
+    "name": "_controllers.x402.tokenizen.nl",
+    "record": "v=1;controller=did:pkh:eip155:1:0xf30b0706E78b3166745E6a2f351992321088058f",
+    "rule": "offer-and-receipt extension, section 4.5.1 (controller bound to the operator domain out of band)",
+    "read_at": "2026-10-26T12:38Z",
+    "resolvers": [
+      "system resolver (VPS, Strasbourg)",
+      "1.1.1.1",
+      "system resolver (Mac, Poland)",
+      "8.8.8.8"
+    ],
+    "matches_recovered_signer": true,
+    "source_of_the_pointer": "holistis, x402-foundation/x402#3396, 2026-10-26T12:26Z"
+  }
 }

@@ -126,9 +126,16 @@ def test_signed_offer_row_loads_with_required_fields():
               "offer", "signature_check", "contributor", "command"):
         assert ex.get(k) not in (None, ""), k
     assert ex["source"] == "observed" and ex["status"] == 402
-    assert ex["signature_check"] in ("recovered", "invalid", "not_run")
-    if ex["signature_check"] == "recovered":
+    assert ex["signature_check"] in ("recovered", "bound", "invalid", "not_run")
+    if ex["signature_check"] in ("recovered", "bound"):
         assert len(ex["recovered_signer"]) == 42
+    if ex["signature_check"] == "bound":
+        b = ex["binding"]
+        for key in ("method", "name", "record", "read_at", "resolvers", "matches_recovered_signer"):
+            assert key in b, key
+        assert b["matches_recovered_signer"] is True
+        assert b["record"].lower().endswith(ex["recovered_signer"].lower())
+        assert len(b["resolvers"]) >= 2
     assert ex["offer"]["format"] == "eip712"
     assert ex["command"] == "`npx -y agent-receipt-verify https://x402.tokenizen.nl/api/bug-intel-quick` @ not run"
     row = bci.external_row(ex)
