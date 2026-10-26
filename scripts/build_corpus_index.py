@@ -148,6 +148,7 @@ def main():
     # per row, cells cut from the contributor's own vector files per the #3396
     # convention. Not loaded by the pytest corpus — their verification command
     # points at the contributor's suite, pinned to the contributor's tag.
+    ext_obs = []  # (id, capture date) of observed rows contributed after the July set
     external_dir = os.path.join(FIXTURES, "external")
     if os.path.isdir(external_dir):
         for fn in sorted(os.listdir(external_dir)):
@@ -155,8 +156,11 @@ def main():
                 continue
             ex = json.load(open(os.path.join(external_dir, fn)))
             rows.append(external_row(ex))
+            if ex.get("source") == "observed":
+                ext_obs.append((ex.get("id", fn), (ex.get("captured_at") or "")[:10]))
 
     n_obs = sum(1 for r in rows if r[2] == "observed")
+    n_obs_july = n_obs - len(ext_obs)
     n_sim = sum(1 for r in rows if r[2] == "simulated")
     n_der = sum(1 for r in rows if r[2] == "derived")
     n_chain = sum(1 for r in rows if r[2] == "requires_chain_read")
@@ -168,10 +172,17 @@ def main():
     print(f"Generated {today} by `scripts/build_corpus_index.py` from the fixtures at `{TAG}` (commit `{head_sha}`). "
           f"Regenerate, do not edit: every cell comes from the vector file, git history, or the daily watch state.")
     print()
-    print(f"**Disclosure note.** These {n_obs} observed vectors have carried full URLs in the public "
+    later = ""
+    if ext_obs:
+        plural = "s" if len(ext_obs) != 1 else ""
+        later = (f" {len(ext_obs)} further observed row{plural} came later, proposed in the thread "
+                 f"by the route operator{plural} with the URL{plural} as posted there: "
+                 + "; ".join(f"`{rid}` ({day})" for rid, day in ext_obs) + ".")
+    print(f"**Disclosure note.** These {n_obs_july} observed vectors have carried full URLs in the public "
           f"repository since July, with route operators either contributing the capture themselves or "
           f"named in provenance. The `host_ref` pseudonymisation agreed in the thread applies to vectors "
-          f"contributed FROM NOW ON whose operators have not seen the capture, not retroactively to these.")
+          f"contributed FROM NOW ON whose operators have not seen the capture, not retroactively to these."
+          + later)
     print()
     print(f"**Freshness.** `captured_at` is the claim's birth date; `last_verified_at` is the last time the "
           f"daily unpaid preflight matched the stored challenge (the (claim, freshness) pair from the thread). "

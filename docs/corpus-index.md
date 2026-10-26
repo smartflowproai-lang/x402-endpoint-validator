@@ -2,7 +2,7 @@
 
 Generated 2026-10-26 by `scripts/build_corpus_index.py` from the fixtures at `v1.5.2` (commit `8315f00`). Regenerate, do not edit: every cell comes from the vector file, git history, or the daily watch state.
 
-**Disclosure note.** These 11 observed vectors have carried full URLs in the public repository since July, with route operators either contributing the capture themselves or named in provenance. The `host_ref` pseudonymisation agreed in the thread applies to vectors contributed FROM NOW ON whose operators have not seen the capture, not retroactively to these.
+**Disclosure note.** These 10 observed vectors have carried full URLs in the public repository since July, with route operators either contributing the capture themselves or named in provenance. The `host_ref` pseudonymisation agreed in the thread applies to vectors contributed FROM NOW ON whose operators have not seen the capture, not retroactively to these. 1 further observed row came later, proposed in the thread by the route operator with the URL as posted there: `tokenizen_signed_offer_v0` (2026-10-26).
 
 **Freshness.** `captured_at` is the claim's birth date; `last_verified_at` is the last time the daily unpaid preflight matched the stored challenge (the (claim, freshness) pair from the thread). Volatile clock fields, where declared, are masked before the verdict.
 
