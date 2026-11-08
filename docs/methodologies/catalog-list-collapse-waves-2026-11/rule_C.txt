@@ -1,0 +1,7 @@
+REGUŁA C (zamrożona przed obejrzeniem danych, zapis przed pierwszym zapytaniem):
+doba skupienia = doba UTC (data odczytu zapaści) z >= 2 zapaściami u hostów o RÓŻNYCH payTo.
+payTo hosta = zbiór payTo z danych katalogu dla hosta (bazaar_snapshots w oknie); brak payTo = osobny "payTo" unikalny dla hosta.
+Dwie zapaści liczą się jako "różne payTo", gdy zbiory payTo hostów są rozłączne (wariant ścisły); doba skupienia gdy istnieje para takich zapaści.
+Zapaść (definicja A): pierwszy odczyt, w którym D < 1% ostatniej wartości >= 200 sprzed niego; hosty z max D >= 200 w danym oknie.
+Kolejna zapaść tego samego hosta możliwa dopiero po powrocie do D >= 200.
+Metryki: liczba zapaści, liczba dób skupienia, udział zapaści w dobach skupienia, rozkład zapaści po dniach tygodnia (UTC).
