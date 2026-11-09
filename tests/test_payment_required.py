@@ -350,6 +350,66 @@ class PaymentRequiredValidationTests(unittest.TestCase):
         self.assertIsNone(result.failure_class)
         self.assertEqual(result.networks, ["base"])
 
+    def test_validate_accepts_body_v1_rejects_negative_amount(self):
+        body_obj = {
+            "x402Version": 1,
+            "accepts": [
+                {
+                    "scheme": "exact",
+                    "network": "base",
+                    "maxAmountRequired": "-999",
+                    "payTo": "0x1111111111111111111111111111111111111111",
+                }
+            ],
+            "error": "payment required",
+        }
+
+        result = validate_accepts(body_obj, source="body")
+
+        self.assertFalse(result.ok)
+        self.assertIsNotNone(result.failure_class)
+        self.assertIn("negative", " ".join(result.findings))
+
+    def test_validate_accepts_body_v1_rejects_empty_string_amount(self):
+        body_obj = {
+            "x402Version": 1,
+            "accepts": [
+                {
+                    "scheme": "exact",
+                    "network": "base",
+                    "maxAmountRequired": "",
+                    "payTo": "0x1111111111111111111111111111111111111111",
+                }
+            ],
+            "error": "payment required",
+        }
+
+        result = validate_accepts(body_obj, source="body")
+
+        self.assertFalse(result.ok)
+        self.assertIsNotNone(result.failure_class)
+        self.assertIn("missing", " ".join(result.findings))
+
+    def test_validate_accepts_body_v1_rejects_non_numeric_amount(self):
+        body_obj = {
+            "x402Version": 1,
+            "accepts": [
+                {
+                    "scheme": "exact",
+                    "network": "base",
+                    "maxAmountRequired": "not-a-number",
+                    "payTo": "0x1111111111111111111111111111111111111111",
+                }
+            ],
+            "error": "payment required",
+        }
+
+        result = validate_accepts(body_obj, source="body")
+
+        self.assertFalse(result.ok)
+        self.assertIsNotNone(result.failure_class)
+        self.assertIn("not a valid number", " ".join(result.findings))
+
     def test_validate_accepts_rejects_empty_accepts_list(self):
         result = validate_accepts({"x402Version": 2, "accepts": [], "error": "payment required"}, source="header")
 
