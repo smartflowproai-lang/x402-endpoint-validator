@@ -436,13 +436,10 @@ def validate_accepts(
                 findings.append(prefix + "body entry missing maxAmountRequired|amount|price")
                 item_hard, item_class = True, item_class or "amount_key"
             else:
-                # The header/v2 path above already requires a valid, non-negative
-                # amount. The legacy body/v1 path only checked that one of the
-                # alias keys was present, so an empty string, a negative value or
-                # non-numeric text previously passed as a valid price. This stays
-                # deliberately looser than the v2 digit-string/atomic-unit rule
-                # (legacy servers may quote a decimal), it only rejects values
-                # that could never be a charge.
+                # Deliberately looser than the v2 digit-string/atomic-unit rule
+                # above (legacy servers may quote a decimal): this only rejects
+                # a price that could never be a real charge (empty, negative, or
+                # not a number), not merely a non-digit-string format.
                 try:
                     price_value = float(price)
                 except ValueError:
