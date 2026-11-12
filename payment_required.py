@@ -431,9 +431,24 @@ def validate_accepts(
                     findings.append(prefix + "strict-v2 requires maxTimeoutSeconds number > 0")
                     item_hard, item_class = True, item_class or "v2_header_invalid"
         else:
-            if _accept_price(item) is None:
+            price = _accept_price(item)
+            if price is None or price.strip() == "":
                 findings.append(prefix + "body entry missing maxAmountRequired|amount|price")
                 item_hard, item_class = True, item_class or "amount_key"
+            else:
+                # Deliberately looser than the v2 digit-string/atomic-unit rule
+                # above (legacy servers may quote a decimal): this only rejects
+                # a price that could never be a real charge (empty, negative, or
+                # not a number), not merely a non-digit-string format.
+                try:
+                    price_value = float(price)
+                except ValueError:
+                    findings.append(prefix + "maxAmountRequired/amount/price is not a valid number")
+                    item_hard, item_class = True, item_class or "amount_key"
+                else:
+                    if price_value < 0:
+                        findings.append(prefix + "maxAmountRequired/amount/price must not be negative")
+                        item_hard, item_class = True, item_class or "amount_key"
 
         per_item_ok.append(not item_hard and not item_info)
         per_item_info.append(not item_hard and item_info)
